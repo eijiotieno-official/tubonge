@@ -1,17 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
 
+import '../../../core/service/firestore_error_service.dart';
 import '../model/auth_user.dart';
 import 'auth_error_service.dart';
-import 'firestore_error_service.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
   final AuthErrorService _authErrorService;
   final FirestoreErrorService _firestoreErrorService;
+  final GoogleSignIn _googleSignIn;
   final Logger _logger;
 
   AuthService(
@@ -19,6 +22,7 @@ class AuthService {
     this._firestore,
     this._authErrorService,
     this._firestoreErrorService,
+    this._googleSignIn,
     this._logger,
   );
 
@@ -70,6 +74,51 @@ class AuthService {
       final String errorMessage =
           _authErrorService.handleException(exception: e);
       _logger.e('Error signing up with email: $errorMessage');
+      return Left(errorMessage);
+    }
+  }
+
+  Future<Either<String, bool>> signInWithGoogle() async {
+    try {
+      if (kIsWeb) {
+        // For Flutter Web, use signInWithPopup
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        googleProvider.addScope('email'); // Only request the email scope
+        final UserCredential userCredential =
+            await _firebaseAuth.signInWithPopup(googleProvider);
+
+        return await _handleUserCreation(userCredential);
+      } else {
+        // For Android/iOS, proceed with Google Sign-In using GoogleSignIn plugin
+        final GoogleSignInAccount? googleUserAccount =
+            await _googleSignIn.signIn();
+
+        // Check if the user aborted the sign-in
+        if (googleUserAccount == null) {
+          return Left('Google sign-in aborted by the user.');
+        }
+
+        // Retrieve the authentication information from Google
+        final GoogleSignInAuthentication googleAuth =
+            await googleUserAccount.authentication;
+
+        // Create OAuthCredential using the access token and ID token
+        final OAuthCredential googleAuthCredential =
+            GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        // Sign in to Firebase with the Google credentials
+        final UserCredential userCredential =
+            await _firebaseAuth.signInWithCredential(googleAuthCredential);
+
+        return await _handleUserCreation(userCredential);
+      }
+    } catch (e) {
+      final String errorMessage =
+          _authErrorService.handleException(exception: e);
+      _logger.e('Error signing in with google: $errorMessage');
       return Left(errorMessage);
     }
   }

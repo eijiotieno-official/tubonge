@@ -7,6 +7,7 @@ environment:
   sdk: ^3.6.1
 
 dependencies:
+  auth_button_kit: ^1.1.6
   cloud_firestore: ^5.6.2
   collection: ^1.19.0
   dartz: ^0.10.1
@@ -17,6 +18,7 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^2.6.1
   go_router: ^14.7.2
+  google_sign_in: ^6.2.2
   logger: ^2.5.0
   permission_handler: ^11.3.1
 
