@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ErrorView extends StatelessWidget {
+class ErrorMessageView extends StatelessWidget {
   final String? errorMessage;
-  const ErrorView({super.key, required this.errorMessage});
+  const ErrorMessageView({super.key, required this.errorMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,7 @@ class ErrorView extends StatelessWidget {
         ? SizedBox.shrink()
         : Consumer(
             builder: (context, ref, child) {
-              return Text(
+              return SelectableText(
                 errorMessage!,
                 textAlign: TextAlign.center,
                 style: TextStyle(

@@ -20,17 +20,22 @@ class AsyncView<T> extends StatelessWidget {
     return Material(
       child: asyncValue.when(
         data: onData,
-        loading: () =>
+        loading: () => Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(asyncValue.toString()),
             loading ??
-            Center(
-              child: CircularProgressIndicator(
-                strokeCap: StrokeCap.round,
-              ),
-            ),
+                Center(
+                  child: CircularProgressIndicator(
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+          ],
+        ),
         error: (error, stackTrace) =>
             onError?.call(error, stackTrace) ??
             Center(
-              child: Text(
+              child: SelectableText(
                 'Unexpected error: $error',
                 style: TextStyle(
                   color: Colors.red,

@@ -5,7 +5,7 @@ import '../../controller/sign_in_with_email_password_controller.dart';
 import '../../controller/sign_in_with_google_controller.dart';
 import '../../controller/sign_up_with_email_password_controller.dart';
 import '../../provider/toggle_sign_state_provider.dart';
-import 'error_view.dart';
+import '../../../../core/widget/error_message_view.dart';
 import 'google_sign_in_view.dart';
 import 'sign_in_form.dart';
 import 'sign_up_form.dart';
@@ -87,9 +87,9 @@ class UnauthenticatedView extends StatelessWidget {
                                       signUpWithEmailPasswordProvider.notifier)
                                   .call(email: email, password: password),
                             ),
-                          ErrorView(errorMessage: errorMessage),
                           Text("or"),
                           GoogleSignInView(),
+                          ErrorMessageView(errorMessage: errorMessage),
                         ],
                       ),
                     ),

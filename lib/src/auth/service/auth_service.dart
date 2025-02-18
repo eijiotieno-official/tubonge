@@ -27,8 +27,8 @@ class AuthService {
   );
 
   Stream<Either<String, bool>> get authStateChangesStream async* {
+    _logger.i('Listening to auth state changes.');
     try {
-      _logger.i('Listening to auth state changes.');
       await for (final user in _firebaseAuth.authStateChanges()) {
         _logger
             .i('Auth state changed. User: ${user != null ? user.uid : "null"}');

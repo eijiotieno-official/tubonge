@@ -10,8 +10,6 @@ class Profile {
     required this.photoUrl,
   });
 
-  
-
   Profile copyWith({
     String? id,
     String? name,
@@ -42,7 +40,8 @@ class Profile {
 
   String toJson() => json.encode(toMap());
 
-  factory Profile.fromJson(String source) => Profile.fromMap(json.decode(source));
+  factory Profile.fromJson(String source) =>
+      Profile.fromMap(json.decode(source));
 
   @override
   String toString() => 'Profile(id: $id, name: $name, photoUrl: $photoUrl)';
@@ -50,13 +49,18 @@ class Profile {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-  
+
     return other is Profile &&
-      other.id == id &&
-      other.name == name &&
-      other.photoUrl == photoUrl;
+        other.id == id &&
+        other.name == name &&
+        other.photoUrl == photoUrl;
   }
 
   @override
   int get hashCode => id.hashCode ^ name.hashCode ^ photoUrl.hashCode;
+
+  static Profile get empty => Profile(id: "", name: "", photoUrl: "");
+
+  bool get isNotEmpty =>
+      id.isNotEmpty && name.isNotEmpty && photoUrl.isNotEmpty;
 }

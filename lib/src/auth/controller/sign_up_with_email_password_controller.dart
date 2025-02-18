@@ -19,7 +19,7 @@ class SignUpWithEmailPasswordController extends StateNotifier<AsyncValue> {
 
     signUpResult.fold(
       (error) {
-        state = AsyncValue.data(error);
+        state = AsyncValue.error(error, StackTrace.current);
       },
       (success) {
         state = AsyncValue.data(success);

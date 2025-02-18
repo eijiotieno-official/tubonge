@@ -1,10 +1,9 @@
-
 import 'package:auth_button_kit/auth_button_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../controller/sign_in_with_google_controller.dart';
-import 'error_view.dart';
+import '../../../../core/widget/error_message_view.dart';
 
 class GoogleSignInView extends ConsumerWidget {
   const GoogleSignInView({super.key});
@@ -39,7 +38,7 @@ class GoogleSignInView extends ConsumerWidget {
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),
-          if (errorMessage != null) ErrorView(errorMessage: errorMessage),
+          ErrorMessageView(errorMessage: errorMessage),
         ],
       ),
     );
