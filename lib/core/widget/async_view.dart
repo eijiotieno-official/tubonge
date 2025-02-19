@@ -20,18 +20,12 @@ class AsyncView<T> extends StatelessWidget {
     return Material(
       child: asyncValue.when(
         data: onData,
-        loading: () => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(asyncValue.toString()),
-            loading ??
-                Center(
-                  child: CircularProgressIndicator(
-                    strokeCap: StrokeCap.round,
-                  ),
-                ),
-          ],
-        ),
+        loading: () => loading ??
+            Center(
+              child: CircularProgressIndicator(
+                strokeCap: StrokeCap.round,
+              ),
+            ),
         error: (error, stackTrace) =>
             onError?.call(error, stackTrace) ??
             Center(

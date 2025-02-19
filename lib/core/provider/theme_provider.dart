@@ -50,7 +50,7 @@ final themeProvider = Provider<ThemeData>(
           ),
           backgroundColor: WidgetStateProperty.resolveWith<Color?>(
             (states) {
-              if (states.contains(MaterialState.disabled)) {
+              if (states.contains(WidgetState.disabled)) {
                 return Colors.grey.shade400;
               }
               return null; // Use default color
@@ -58,7 +58,7 @@ final themeProvider = Provider<ThemeData>(
           ),
           foregroundColor: WidgetStateProperty.resolveWith<Color?>(
             (states) {
-              if (states.contains(MaterialState.disabled)) {
+              if (states.contains(WidgetState.disabled)) {
                 return Colors.white.withOpacity(0.6);
               }
               return null; // Use default color
