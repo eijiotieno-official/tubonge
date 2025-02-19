@@ -34,7 +34,7 @@ class MainApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
-      theme: ref.watch(themeProvider),
+      theme: ref.watch(themeProvider(context)),
       home: AuthWrapper(),
     );
   }
