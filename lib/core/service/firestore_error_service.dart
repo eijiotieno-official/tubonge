@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreErrorService {
-  String getErrorMessage(FirebaseException e) {
+  String _getErrorMessage(FirebaseException e) {
     switch (e.code) {
       case 'permission-denied':
         return 'You do not have permission to perform this action.';
@@ -36,7 +36,7 @@ class FirestoreErrorService {
 
   String handleException(Object exception) {
     if (exception is FirebaseException) {
-      return getErrorMessage(exception);
+      return _getErrorMessage(exception);
     } else {
       return 'An unexpected error occurred: $exception';
     }
