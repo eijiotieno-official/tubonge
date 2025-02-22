@@ -9,7 +9,11 @@ final selectedIndexProvider = StateProvider<int>(
 );
 
 class RailView extends ConsumerWidget {
-  const RailView({super.key});
+  final VoidCallback onComposeTap;
+  const RailView({
+    super.key,
+    required this.onComposeTap,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,8 +40,7 @@ class RailView extends ConsumerWidget {
                   ),
                 ),
                 child: FloatingActionButton(
-                  elevation: 0,
-                  onPressed: () {},
+                  onPressed: onComposeTap,
                   child: Icon(Icons.create_rounded),
                 ),
               ),
@@ -49,7 +52,6 @@ class RailView extends ConsumerWidget {
                       onDestinationSelected: (index) {
                         ref.read(selectedIndexProvider.notifier).state = index;
                       },
-                      extended: screenType == DeviceScreenType.desktop,
                       destinations: _buildNavigationRailDestinations(context),
                       selectedIndex: selectedIndex,
                     ),
@@ -64,8 +66,8 @@ class RailView extends ConsumerWidget {
       BuildContext context) {
     final destinations = [
       _navigationRailDestination(
-        icon: Icons.chat_bubble_outline_rounded,
-        selectedIcon: Icons.chat_bubble,
+        icon: Icons.message_outlined,
+        selectedIcon: Icons.message_rounded,
         label: "Chat",
         unreadCount: 0,
         context: context,

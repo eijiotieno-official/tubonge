@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tubonge/src/home/view/rail_view.dart';
+import 'package:tubonge/src/chat/view/chats_view.dart';
+
+import 'rail_view.dart';
 
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
@@ -16,7 +18,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
       child: SafeArea(
         child: Row(
           children: [
-            RailView(),
+            RailView(
+              onComposeTap: () {},
+            ),
+            ChatsView(),
           ],
         ),
       ),

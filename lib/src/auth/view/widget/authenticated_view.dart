@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widget/async_view.dart';
-import '../../../home/view/home_view.dart';
+import '../../../../core/widget/home_view.dart';
 import '../../../profile/model/profile_model.dart';
 import '../../../profile/provider/current_user_profile_provider.dart';
 import '../../../profile/view/profile_form_view.dart';

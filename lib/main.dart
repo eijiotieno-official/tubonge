@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tubonge/core/widget/home_view.dart';
 
 import 'core/provider/theme_provider.dart';
 import 'firebase_options.dart';
@@ -35,7 +36,7 @@ class MainApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       theme: ref.watch(themeProvider(context)),
-      home: AuthWrapper(),
+      home: HomeView(),
     );
   }
 }
