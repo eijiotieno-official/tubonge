@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../model/profile_model.dart';
 import 'profile_service_provider.dart';
 
-final currentUserProfileProvider = StreamProvider<AsyncValue<Profile>>(
+final currentUserProfileProvider = StreamProvider.autoDispose<AsyncValue<Profile>>(
   (ref) async* {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
