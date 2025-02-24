@@ -38,46 +38,44 @@ class ChatsController extends StateNotifier<AsyncValue<List<Chat>>> {
             } else {
               state = AsyncValue.data(chats);
               for (var chat in chats) {
-                _logger.i("Processing chat with userId: ${chat.userId}");
+                _logger.i("Processing chat with chatId: ${chat.chatId}");
                 List<Chat> currentChats = state.value ?? [];
                 int chatIndex =
-                    currentChats.indexWhere((c) => c.userId == chat.userId);
+                    currentChats.indexWhere((c) => c.chatId == chat.chatId);
 
                 if (chatIndex == -1) {
                   _logger.w(
-                      "Chat with userId: ${chat.userId} not found in state.");
+                      "Chat with chatId: ${chat.chatId} not found in state.");
                   continue;
                 }
 
                 List<Message> initialMessages =
                     currentChats[chatIndex].messages;
                 _logger.i(
-                    "Subscribing to messages for chat ${chat.userId} with ${initialMessages.length} initial messages.");
+                    "Subscribing to messages for chat ${chat.chatId} with ${initialMessages.length} initial messages.");
 
                 Stream<Either<String, List<Message>>> messagesStream =
                     _messageService.subscribeToMessages(
-                        chatId: chat.userId, initialMessages: initialMessages);
+                        chatId: chat.chatId, initialMessages: initialMessages);
 
                 messagesStream.listen(
-                  (messagesEither) {
-                    messagesEither.fold(
-                      (error) {
-                        _logger.e(
-                            "Error fetching messages for chat ${chat.userId}: $error");
-                        state = AsyncValue.error(error, StackTrace.current);
-                      },
-                      (messages) {
-                        _logger.i(
-                            "Received ${messages.length} messages for chat ${chat.userId}.");
-                        currentChats[chatIndex] = currentChats[chatIndex]
-                            .copyWith(messages: messages);
-                        state = AsyncValue.data(currentChats);
-                      },
-                    );
-                  },
+                  (messagesEither) => messagesEither.fold(
+                    (error) {
+                      _logger.e(
+                          "Error fetching messages for chat ${chat.chatId}: $error");
+                      state = AsyncValue.error(error, StackTrace.current);
+                    },
+                    (messages) {
+                      _logger.i(
+                          "Received ${messages.length} messages for chat ${chat.chatId}.");
+                      currentChats[chatIndex] =
+                          currentChats[chatIndex].copyWith(messages: messages);
+                      state = AsyncValue.data(currentChats);
+                    },
+                  ),
                   onError: (error) {
                     _logger.e(
-                        "Error in messages stream for chat ${chat.userId}: $error");
+                        "Error in messages stream for chat ${chat.chatId}: $error");
                   },
                 );
               }
@@ -94,8 +92,10 @@ class ChatsController extends StateNotifier<AsyncValue<List<Chat>>> {
 }
 
 final chatsProvider =
-    StateNotifierProvider<ChatsController, AsyncValue<List<Chat>>>((ref) {
-  final chatService = ChatService();
-  final messageService = MessageService();
-  return ChatsController(chatService, messageService);
-});
+    StateNotifierProvider<ChatsController, AsyncValue<List<Chat>>>(
+  (ref) {
+    final chatService = ChatService();
+    final messageService = MessageService();
+    return ChatsController(chatService, messageService);
+  },
+);

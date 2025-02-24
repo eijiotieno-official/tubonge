@@ -23,7 +23,7 @@ class ChatService {
     }
 
     try {
-      final docRef = _chats(_currentUserId).doc(chat.userId);
+      final docRef = _chats(_currentUserId).doc(chat.chatId);
 
       final docSnapshot = await docRef.get();
 
@@ -32,7 +32,7 @@ class ChatService {
             "Chat creation failed: A chat with this user already exists.");
       }
 
-      final updatedChat = chat.copyWith(userId: docRef.id);
+      final updatedChat = chat.copyWith(chatId: docRef.id);
 
       await docRef.set(updatedChat.toMap());
 
@@ -50,7 +50,7 @@ class ChatService {
     }
 
     try {
-      await _chats(_currentUserId).doc(chat.userId).update(chat.toMap());
+      await _chats(_currentUserId).doc(chat.chatId).update(chat.toMap());
       return Right(chat);
     } catch (error) {
       final errorMessage = _firestoreErrorService.handleException(error);

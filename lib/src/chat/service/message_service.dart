@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/service/firestore_error_service.dart';
 import '../models/message_model.dart';
@@ -138,7 +139,7 @@ class MessageService {
     );
   }
 
-  static List<Message> sortItemsByDate(
+  List<Message> sortItemsByDate(
     List<Message> messages, {
     bool ascending = true,
   }) {
@@ -151,5 +152,21 @@ class MessageService {
         : b.timeSent.compareTo(a.timeSent));
 
     return messages;
+  }
+
+  String formatTimeSent(DateTime dateTime) {
+    final today = DateTime.now();
+    final difference = today.difference(dateTime).inDays;
+
+    if (difference == 0) {
+      return 'Today';
+    } else if (difference == 1) {
+      return 'Yesterday';
+    } else if (difference <= 7) {
+      return DateFormat.EEEE()
+          .format(dateTime); // Outputs "Monday", "Tuesday", etc.
+    } else {
+      return DateFormat('d MMM yyyy').format(dateTime); // Outputs "7 Jan 2025"
+    }
   }
 }

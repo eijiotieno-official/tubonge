@@ -170,11 +170,11 @@ class MessageFileUploadController extends StateNotifier<MessageFileUpload> {
     }
   }
 
-  Future<void> _updateMessage({
+  void _updateMessage({
     required Message message,
     required String url,
     required PlatformFile? file,
-  }) async {
+  }) {
     if (file == null) {
       _logger.w("No file available in _updateMessage. Aborting update.");
       return;

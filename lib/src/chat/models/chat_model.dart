@@ -5,33 +5,33 @@ import 'package:flutter/foundation.dart';
 import 'message_model.dart';
 
 class Chat {
-  final String userId;
+  final String chatId;
   List<Message> messages;
   Chat({
-    required this.userId,
+    required this.chatId,
     required this.messages,
   });
 
   Chat copyWith({
-    String? userId,
+    String? chatId,
     List<Message>? messages,
   }) {
     return Chat(
-      userId: userId ?? this.userId,
+      chatId: chatId ?? this.chatId,
       messages: messages ?? this.messages,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'userId': userId,
+      'chatId': chatId,
       'messages': messages.map((x) => x.toMap()).toList(),
     };
   }
 
   factory Chat.fromMap(Map<String, dynamic> map) {
     return Chat(
-      userId: map['userId'] ?? '',
+      chatId: map['chatId'] ?? '',
       messages:
           List<Message>.from(map['messages']?.map((x) => Message.fromMap(x))),
     );
@@ -42,17 +42,17 @@ class Chat {
   factory Chat.fromJson(String source) => Chat.fromMap(json.decode(source));
 
   @override
-  String toString() => 'Chat(userId: $userId, messages: $messages)';
+  String toString() => 'Chat(chatId: $chatId, messages: $messages)';
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
 
     return other is Chat &&
-        other.userId == userId &&
+        other.chatId == chatId &&
         listEquals(other.messages, messages);
   }
 
   @override
-  int get hashCode => userId.hashCode ^ messages.hashCode;
+  int get hashCode => chatId.hashCode ^ messages.hashCode;
 }
