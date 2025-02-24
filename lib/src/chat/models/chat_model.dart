@@ -55,4 +55,6 @@ class Chat {
 
   @override
   int get hashCode => chatId.hashCode ^ messages.hashCode;
+
+  static Chat get empty => Chat(chatId: "", messages: []);
 }

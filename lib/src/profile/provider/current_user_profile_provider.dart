@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../model/profile_model.dart';
 import 'profile_service_provider.dart';
 
-final currentUserProfileProvider = StreamProvider.autoDispose<AsyncValue<Profile>>(
-  (ref) async* {
+final currentUserProfileProvider = StreamProvider.autoDispose<Profile>(
+  (ref) {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
     if (currentUserId != null) {
@@ -13,14 +13,14 @@ final currentUserProfileProvider = StreamProvider.autoDispose<AsyncValue<Profile
 
       final profileStream = profileService.streamSpecific(currentUserId);
 
-      await for (final either in profileStream) {
-        yield either.fold(
-          (error) => AsyncValue.error(error, StackTrace.current),
-          (profile) => AsyncValue.data(profile),
-        );
-      }
-    } else {
-      yield AsyncValue.data(Profile.empty);
+      return profileStream.map(
+        (either) => either.fold(
+          (error) => throw error,
+          (profile) => profile,
+        ),
+      );
     }
+
+    return Stream.value(Profile.empty);
   },
 );

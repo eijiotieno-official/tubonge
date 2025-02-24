@@ -97,19 +97,6 @@ class _MessageItemViewState extends ConsumerState<MessageItemView> {
   Widget build(BuildContext context) {
     Message message = widget.message;
 
-    final currentUser = ref.watch(currentUserProfileProvider).value?.value;
-
-    bool fromCurrentUser = message.sender == currentUser?.id;
-
-    Alignment alignment =
-        fromCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
-
-    bool showStatus = fromCurrentUser;
-
-    Color? color = fromCurrentUser
-        ? Theme.of(context).hoverColor
-        : Theme.of(context).colorScheme.primaryContainer;
-
     final openedChatId = ref.watch(openedChatIdProvider);
 
     final isSelected = ref
@@ -118,75 +105,92 @@ class _MessageItemViewState extends ConsumerState<MessageItemView> {
 
     final selectedMessages = ref.watch(selectedMessagesProvider);
 
-    return AutoScrollTag(
-      key: ValueKey(widget.index),
-      controller: widget.scrollController,
-      index: widget.index,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 1.0),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primaryContainer
-                : null,
-          ),
-          child: Align(
-            alignment: alignment,
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: 8.0,
-                right: 8.0,
-                top: widget.topPadding,
+    final currentUserProfile = ref.watch(currentUserProfileProvider);
+
+    return currentUserProfile.when(
+      data: (profile) {
+        bool fromCurrentUser = message.sender == profile.id;
+
+        Alignment alignment =
+            fromCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
+
+        bool showStatus = fromCurrentUser;
+
+        Color? color = fromCurrentUser
+            ? Theme.of(context).hoverColor
+            : Theme.of(context).colorScheme.primaryContainer;
+
+        return AutoScrollTag(
+          key: ValueKey(widget.index),
+          controller: widget.scrollController,
+          index: widget.index,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 1.0),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
               ),
-              child: GestureDetector(
-                onLongPress: () {
-                  if (selectedMessages.isEmpty) {
-                    ref
-                        .read(selectedMessagesProvider.notifier)
-                        .select(chatId: openedChatId ?? "", message: message);
-                  }
-                },
-                onTap: () {
-                  if (selectedMessages.isNotEmpty) {
-                    ref
-                        .read(selectedMessagesProvider.notifier)
-                        .select(chatId: openedChatId ?? "", message: message);
-                  }
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: color,
-                    borderRadius: BorderRadius.circular(8.0),
+              child: Align(
+                alignment: alignment,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: 8.0,
+                    right: 8.0,
+                    top: widget.topPadding,
                   ),
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width * 0.8,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (message is TextMessage)
-                          TextMessageView(
-                            key: Key(message.id),
-                            message: message,
-                            showStatus: showStatus,
-                          )
-                        else if (message is ImageMessage)
-                          ImageMessageView(
-                            key: Key(message.id),
-                            message: message,
-                            showStatus: showStatus,
-                          ),
-                      ],
+                  child: GestureDetector(
+                    onLongPress: () {
+                      if (selectedMessages.isEmpty) {
+                        ref.read(selectedMessagesProvider.notifier).select(
+                            chatId: openedChatId ?? "", message: message);
+                      }
+                    },
+                    onTap: () {
+                      if (selectedMessages.isNotEmpty) {
+                        ref.read(selectedMessagesProvider.notifier).select(
+                            chatId: openedChatId ?? "", message: message);
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.8,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (message is TextMessage)
+                              TextMessageView(
+                                key: Key(message.id),
+                                message: message,
+                                showStatus: showStatus,
+                              )
+                            else if (message is ImageMessage)
+                              ImageMessageView(
+                                key: Key(message.id),
+                                message: message,
+                                showStatus: showStatus,
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
+      error: (error, stackTrace) => SizedBox.shrink(),
+      loading: () => SizedBox.shrink(),
     );
   }
 }

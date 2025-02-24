@@ -26,6 +26,8 @@ class MediaPickerNotifier
   void clear() {
     state = AsyncValue.data([]);
   }
+
+  
 }
 
 final filePickerProvider =

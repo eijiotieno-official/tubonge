@@ -17,23 +17,18 @@ class AuthenticatedView extends StatelessWidget {
       builder: (context, ref, child) {
         final currentUserProfileAsyncValue =
             ref.watch(currentUserProfileProvider);
-            
+
         return AsyncView(
           asyncValue: currentUserProfileAsyncValue,
-          onData: (profileAsyncValue) {
-            return AsyncView(
-              asyncValue: profileAsyncValue,
-              onData: (profile) {
-                final shouldCreateProfile = profile.isNotEmpty == false;
+          onData: (profile) {
+            final shouldCreateProfile = profile.isNotEmpty == false;
 
-                return shouldCreateProfile
-                    ? ProfileFormView(
-                        profile: Profile.empty.copyWith(
-                            id: FirebaseAuth.instance.currentUser?.uid),
-                      )
-                    : HomeView();
-              },
-            );
+            return shouldCreateProfile
+                ? ProfileFormView(
+                    profile: Profile.empty
+                        .copyWith(id: FirebaseAuth.instance.currentUser?.uid),
+                  )
+                : HomeView();
           },
         );
       },

@@ -8,7 +8,7 @@ import '../models/chat_model.dart';
 class ChatService {
   final FirestoreErrorService _firestoreErrorService = FirestoreErrorService();
 
-  CollectionReference _chats(String? userId) => FirebaseFirestore.instance
+  CollectionReference chats(String? userId) => FirebaseFirestore.instance
       .collection("users")
       .doc(userId)
       .collection("chats");
@@ -23,7 +23,7 @@ class ChatService {
     }
 
     try {
-      final docRef = _chats(_currentUserId).doc(chat.chatId);
+      final docRef = chats(_currentUserId).doc(chat.chatId);
 
       final docSnapshot = await docRef.get();
 
@@ -50,7 +50,7 @@ class ChatService {
     }
 
     try {
-      await _chats(_currentUserId).doc(chat.chatId).update(chat.toMap());
+      await chats(_currentUserId).doc(chat.chatId).update(chat.toMap());
       return Right(chat);
     } catch (error) {
       final errorMessage = _firestoreErrorService.handleException(error);
@@ -65,7 +65,7 @@ class ChatService {
     }
 
     try {
-      await _chats(_currentUserId).doc(chatId).delete();
+      await chats(_currentUserId).doc(chatId).delete();
       return Right(true);
     } catch (error) {
       final errorMessage = _firestoreErrorService.handleException(error);
@@ -80,7 +80,7 @@ class ChatService {
       );
     }
 
-    return _chats(_currentUserId)
+    return chats(_currentUserId)
         .snapshots()
         .asyncMap<Either<String, List<Chat>>>(
       (querySnapshot) async {
