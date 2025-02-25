@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widget/error_message_view.dart';
 import '../../controller/sign_in_with_email_password_controller.dart';
 import '../../controller/sign_in_with_google_controller.dart';
 import '../../controller/sign_up_with_email_password_controller.dart';
 import '../../provider/toggle_sign_state_provider.dart';
-import '../../../../core/widget/error_message_view.dart';
 import 'google_sign_in_view.dart';
 import 'sign_in_form.dart';
 import 'sign_up_form.dart';

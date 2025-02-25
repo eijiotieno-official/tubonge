@@ -8,8 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/util/string_util.dart';
 import '../../models/message_model.dart';
-import 'message_time_status_view.dart';
 import '../message_upload_progress_view.dart';
+import 'message_time_status_view.dart';
 
 class ImageMessageView extends ConsumerWidget {
   final ImageMessage message;

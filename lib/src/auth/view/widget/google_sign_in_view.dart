@@ -2,8 +2,8 @@ import 'package:auth_button_kit/auth_button_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controller/sign_in_with_google_controller.dart';
 import '../../../../core/widget/error_message_view.dart';
+import '../../controller/sign_in_with_google_controller.dart';
 
 class GoogleSignInView extends ConsumerWidget {
   const GoogleSignInView({super.key});

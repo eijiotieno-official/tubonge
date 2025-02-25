@@ -4,9 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../../core/service/auth_error_service.dart';
 import '../../../core/service/firestore_error_service.dart';
 import '../model/auth_user.dart';
-import '../../../core/service/auth_error_service.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
