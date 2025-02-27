@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tubonge/core/provider/theme_provider.dart';
 
 import '../../../core/widget/async_view.dart';
 import '../../profile/provider/stream_profile_provider.dart';
@@ -21,12 +22,38 @@ class ChatsListView extends ConsumerWidget {
       onData: (data) {
         final chats = data.where((chat) => chat.messages.isNotEmpty).toList();
 
-        return ListView.builder(
-          itemCount: chats.length,
-          itemBuilder: (context, index) {
-            final chat = chats[index];
-            return ChatItemView(chat: chat);
-          },
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      "Tubonge",
+                      style: ref.read(themeProvider).textTheme.headlineMedium,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.search_rounded,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: chats.length,
+                itemBuilder: (context, index) {
+                  final chat = chats[index];
+                  return ChatItemView(chat: chat);
+                },
+              ),
+            ),
+          ],
         );
       },
     );
@@ -42,6 +69,8 @@ class ChatItemView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(themeProvider);
+
     final messageService = ref.watch(messageServiceProvider);
 
     final sortedMessages = messageService.sortItemsByDate(chat.messages);
@@ -71,8 +100,12 @@ class ChatItemView extends ConsumerWidget {
 
     final profileState = ref.watch(streamProfileProvider(chat.chatId));
 
+    final openedChatId = ref.watch(openedChatIdProvider);
+
     return profileState.when(
       data: (profile) => ListTile(
+        selected: openedChatId == chat.chatId,
+        selectedColor: theme.primaryColor,
         onTap: () {
           ref.read(openedChatIdProvider.notifier).state = chat.chatId;
         },

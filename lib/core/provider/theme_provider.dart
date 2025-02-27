@@ -7,27 +7,9 @@ final themeProvider = Provider<ThemeData>(
       useMaterial3: true,
       colorSchemeSeed: Colors.blue,
       brightness: Brightness.light,
-      textTheme: TextTheme(
-        headlineMedium: TextStyle(
-          fontSize: 36.0,
-          fontWeight: FontWeight.bold,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 18.0,
-        ),
-        labelMedium: TextStyle(
-          fontSize: 18.0,
-          color: Colors.black.withOpacity(0.55),
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-          textStyle: WidgetStatePropertyAll(
-            TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+      listTileTheme: ListTileThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(

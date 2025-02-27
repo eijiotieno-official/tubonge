@@ -15,60 +15,42 @@ class UnauthenticatedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-
+    final theme = Theme.of(context);
     return Consumer(
       builder: (context, ref, child) {
-        final theme = Theme.of(context);
-
         final toggleSignState = ref.watch(toggleSignStateProvider);
-
         final operationState = toggleSignState == ToggleSignState.signIn
             ? ref.watch(signInWithEmailPasswordProvider)
             : ref.watch(signUpWithEmailPasswordProvider);
-
         final signInWithGoogleState = ref.watch(signInWithGoogleProvider);
-
         final isLoading =
             operationState.isLoading || signInWithGoogleState.isLoading;
-
         final errorMessage = operationState.error?.toString();
 
-        return Material(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned.fill(
-                child: Column(
-                  children: [
-                    Flexible(
-                      flex: 2,
-                      child: Container(
-                        color: theme.primaryColor,
+        return Scaffold(
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              // Compute container width as 90% of the screen width,
+              // then clamp it between 300 and 500 pixels.
+              double computedWidth =
+                  (constraints.maxWidth * 0.9).clamp(300.0, 500.0);
+
+              return Center(
+                child: SingleChildScrollView(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: computedWidth,
+                    curve: Curves.easeInOut,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24.0),
+                        color: theme.scaffoldBackgroundColor,
+                        border: Border.all(
+                          color: Colors.black.withOpacity(0.1),
+                        ),
                       ),
-                    ),
-                    Flexible(
-                      flex: 2,
-                      child: Container(),
-                    ),
-                  ],
-                ),
-              ),
-              Center(
-                child: SizedBox(
-                  width: screenWidth * 0.3,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24.0),
-                      color: theme.scaffoldBackgroundColor,
-                      border: Border.all(
-                        color: Colors.black.withOpacity(0.1),
-                      ),
-                    ),
-                    child: Padding(
                       padding: const EdgeInsets.all(36.0),
                       child: Column(
-                        spacing: 16.0,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (toggleSignState == ToggleSignState.signIn)
@@ -87,16 +69,19 @@ class UnauthenticatedView extends StatelessWidget {
                                       signUpWithEmailPasswordProvider.notifier)
                                   .call(email: email, password: password),
                             ),
-                          Text("or"),
+                          const SizedBox(height: 16.0),
+                          const Text("or"),
+                          const SizedBox(height: 16.0),
                           GoogleSignInView(),
+                          const SizedBox(height: 16.0),
                           ErrorMessageView(errorMessage: errorMessage),
                         ],
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              );
+            },
           ),
         );
       },

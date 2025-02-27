@@ -25,14 +25,14 @@ class _UsersListViewState extends ConsumerState<UsersListView> {
     final theme = ref.watch(themeProvider);
     final double screenWidth = MediaQuery.of(context).size.width;
 
-    return Material(
-      color: Colors.transparent,
-      child: Center(
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.0),
         child: Container(
           width: screenWidth * 0.3,
           constraints: BoxConstraints(
             maxWidth: double.infinity,
-            maxHeight: MediaQuery.of(context).size.height * 0.85,
+            maxHeight: MediaQuery.of(context).size.height * 0.5,
           ),
           decoration: BoxDecoration(
             color: theme.scaffoldBackgroundColor,
@@ -41,7 +41,7 @@ class _UsersListViewState extends ConsumerState<UsersListView> {
           child: AsyncView(
             asyncValue: usersState,
             onData: (users) {
-              // If no search has been performed, initialize _filteredUsers to the full list.
+              // If no search has been performed, initializwidgete _filteredUsers to the full list.
               if (_searchController.text.isEmpty && _filteredUsers.isEmpty) {
                 _filteredUsers = users;
               }
@@ -50,50 +50,67 @@ class _UsersListViewState extends ConsumerState<UsersListView> {
               final displayUsers =
                   _filteredUsers.isEmpty ? users : _filteredUsers;
 
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: (value) {
-                        setState(() {
-                          _filteredUsers = users
-                              .where((user) => user.name
-                                  .toLowerCase()
-                                  .contains(value.toLowerCase()))
-                              .toList();
-                        });
-                      },
-                      decoration: InputDecoration(
-                        labelText: 'Search users',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(
+                          Icons.close_rounded,
                         ),
                       ),
                     ),
-                  ),
-                  Flexible(
-                    child: ListView.builder(
-                      itemCount: displayUsers.length,
-                      itemBuilder: (context, index) {
-                        final user = displayUsers[index];
-                        return ListTile(
-                          onTap: () {
-                            ref.read(openedChatIdProvider.notifier).state =
-                                user.id;
-                            Navigator.pop(context);
-                          },
-                          leading: CircleAvatar(
-                            backgroundImage:
-                                CachedNetworkImageProvider(user.photoUrl),
-                          ),
-                          title: Text(user.name),
-                        );
-                      },
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        controller: _searchController,
+                        autofocus: true,
+                        onChanged: (value) {
+                          setState(() {
+                            _filteredUsers = users
+                                .where((user) => user.name
+                                    .toLowerCase()
+                                    .contains(value.toLowerCase()))
+                                .toList();
+                          });
+                        },
+                        
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.search_rounded),
+                          hintText: 'Search users',
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ListView.builder(
+                          itemCount: displayUsers.length,
+                          itemBuilder: (context, index) {
+                            final user = displayUsers[index];
+                            return ListTile(
+                              onTap: () {
+                                ref.read(openedChatIdProvider.notifier).state =
+                                    user.id;
+                                Navigator.pop(context);
+                              },
+                              leading: CircleAvatar(
+                                backgroundImage:
+                                    CachedNetworkImageProvider(user.photoUrl),
+                              ),
+                              title: Text(user.name),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),

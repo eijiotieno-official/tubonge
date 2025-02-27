@@ -31,6 +31,7 @@ class GoogleSignInView extends ConsumerWidget {
             showLoader: isLoading,
             padding: EdgeInsets.zero,
             fontWeight: FontWeight.bold,
+            fontSize: DefaultTextStyle.of(context).style.fontSize,
             shape: RoundedRectangleBorder(
               side: BorderSide(
                 color: Theme.of(context).dividerColor.withOpacity(0.25),

@@ -23,7 +23,7 @@ class ProfileFormView extends ConsumerStatefulWidget {
 
 class _CreateProfileFormState extends ConsumerState<ProfileFormView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
+  TextEditingController _nameController = TextEditingController();
 
   late Profile _profile;
   PlatformFile? platformFile;
@@ -34,6 +34,7 @@ class _CreateProfileFormState extends ConsumerState<ProfileFormView> {
   void initState() {
     super.initState();
     _profile = widget.profile;
+    _nameController = TextEditingController(text: widget.profile.name);
   }
 
   Future<void> _pickImage() async {

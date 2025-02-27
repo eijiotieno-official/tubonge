@@ -1,3 +1,4 @@
+import 'dart:ui'; // for lerpDouble
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +18,8 @@ class SignUpForm extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _SignUpFormState();
 }
 
-class _SignUpFormState extends ConsumerState<SignUpForm> {
+class _SignUpFormState extends ConsumerState<SignUpForm>
+    with TickerProviderStateMixin {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
@@ -63,7 +65,6 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   }
 
   Future<void> _handleSignUp() async {
-    // Trigger form validation
     if (_formKey.currentState?.validate() ?? false) {
       widget.onSignUp(
         _emailController.text.trim(),
@@ -75,110 +76,152 @@ class _SignUpFormState extends ConsumerState<SignUpForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     bool enabled = widget.enabled;
 
-    return Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 24.0,
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 16.0,
-            children: [
-              Text(
-                "Welcome Aboard!",
-                style: theme.textTheme.headlineMedium,
-              ),
-              Text(
-                "Let's get you started with a new account.",
-                style: theme.textTheme.labelMedium,
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          TextFormField(
-            enabled: enabled,
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            validator: _emailValidator,
-            decoration: InputDecoration(
-              labelText: "Email",
-            ),
-          ),
-          TextFormField(
-            enabled: enabled,
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            validator: _passwordValidator,
-            decoration: InputDecoration(
-              labelText: "Password",
-              suffixIcon: InkWell(
-                onTap: _toggleObscurePassword,
-                child: Icon(
-                  _obscurePassword
-                      ? Icons.remove_red_eye_rounded
-                      : Icons.visibility_off_rounded,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Gradually interpolate spacing between 16 and 24 for widths between 300 and 600.
+        double spacing = constraints.maxWidth < 300
+            ? 16.0
+            : constraints.maxWidth > 600
+                ? 24.0
+                : lerpDouble(16, 24, (constraints.maxWidth - 300) / 300)!;
+
+        // Gradually interpolate headline font size between 20 and 28.
+        double headlineFontSize = constraints.maxWidth < 300
+            ? 20.0
+            : constraints.maxWidth > 600
+                ? 28.0
+                : lerpDouble(20, 28, (constraints.maxWidth - 300) / 300)!;
+
+        // Gradually interpolate label font size between 14 and 16.
+        double labelFontSize = constraints.maxWidth < 300
+            ? 14.0
+            : constraints.maxWidth > 600
+                ? 16.0
+                : lerpDouble(14, 16, (constraints.maxWidth - 300) / 300)!;
+
+        return AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Header Section
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Welcome Aboard!",
+                      style: theme.textTheme.headlineMedium
+                          ?.copyWith(fontSize: headlineFontSize),
+                    ),
+                    SizedBox(height: spacing / 2),
+                    Text(
+                      "Let's get you started with a new account.",
+                      style: theme.textTheme.labelMedium
+                          ?.copyWith(fontSize: labelFontSize),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-          ),
-          TextFormField(
-            enabled: enabled,
-            controller: _confirmPasswordController,
-            obscureText: _obscurePassword,
-            validator: _confirmPasswordValidator,
-            decoration: InputDecoration(
-              labelText: "Confirm Password",
-              suffixIcon: InkWell(
-                onTap: _toggleObscurePassword,
-                child: Icon(
-                  _obscurePassword
-                      ? Icons.remove_red_eye_rounded
-                      : Icons.visibility_off_rounded,
+                
+                SizedBox(height: spacing),
+                // Email Field
+                TextFormField(
+                  enabled: enabled,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: _emailValidator,
+                  decoration: const InputDecoration(
+                    labelText: "Email",
+                  ),
                 ),
-              ),
-            ),
-          ),
-          if (!enabled)
-            Center(
-              child: CircularProgressIndicator(
-                strokeCap: StrokeCap.round,
-              ),
-            )
-          else
-            FilledButton(
-              onPressed: _handleSignUp,
-              child: Text(
-                "Sign Up",
-                style: TextStyle(
-                  fontSize: 18.0,
+                SizedBox(height: spacing),
+                // Password Field
+                TextFormField(
+                  enabled: enabled,
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  validator: _passwordValidator,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    suffixIcon: InkWell(
+                      onTap: _toggleObscurePassword,
+                      child: Icon(
+                        _obscurePassword
+                            ? Icons.remove_red_eye_rounded
+                            : Icons.visibility_off_rounded,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                SizedBox(height: spacing),
+                // Confirm Password Field
+                TextFormField(
+                  enabled: enabled,
+                  controller: _confirmPasswordController,
+                  obscureText: _obscurePassword,
+                  validator: _confirmPasswordValidator,
+                  decoration: InputDecoration(
+                    labelText: "Confirm Password",
+                    suffixIcon: InkWell(
+                      onTap: _toggleObscurePassword,
+                      child: Icon(
+                        _obscurePassword
+                            ? Icons.remove_red_eye_rounded
+                            : Icons.visibility_off_rounded,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: spacing),
+                // Action Button or Loading Indicator
+                if (!enabled)
+                  Center(
+                    child: CircularProgressIndicator(
+                      strokeCap: StrokeCap.round,
+                    ),
+                  )
+                else
+                  FilledButton(
+                    onPressed: _handleSignUp,
+                    child: const Text(
+                      "Sign Up",
+                      style: TextStyle(fontSize: 18.0),
+                    ),
+                  ),
+                SizedBox(height: spacing),
+                // Footer: Already have an account?
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Already have an account?",
+                      style: theme.textTheme.labelMedium
+                          ?.copyWith(fontSize: labelFontSize),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (enabled) {
+                          ref.read(toggleSignStateProvider.notifier).state =
+                              ToggleSignState.signIn;
+                        }
+                      },
+                      child: Text("Sign In"),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                "Already have an account?",
-                style: theme.textTheme.labelMedium,
-              ),
-              TextButton(
-                onPressed: () {
-                  if (enabled) {
-                    ref.read(toggleSignStateProvider.notifier).state =
-                        ToggleSignState.signIn;
-                  }
-                },
-                child: Text("Sign In"),
-              ),
-            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -16,6 +16,11 @@ class ChatView extends ConsumerWidget {
             flex: 1,
             child: ChatsListView(),
           ),
+          Container(
+            width: 1,
+            height: double.infinity,
+             color: Colors.black.withOpacity(0.1),
+          ),
           Flexible(
             flex: 3,
             child: ChatDetailView(),

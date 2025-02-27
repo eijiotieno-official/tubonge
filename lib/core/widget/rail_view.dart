@@ -35,11 +35,12 @@ class RailView extends ConsumerWidget {
                   getValueForScreenType<double>(
                     context: context,
                     mobile: 8,
-                    tablet: 16,
-                    desktop: 16,
+                    tablet: 12,
+                    desktop: 12,
                   ),
                 ),
                 child: FloatingActionButton(
+                  elevation: 0,
                   onPressed: onComposeTap,
                   child: Icon(Icons.create_rounded),
                 ),

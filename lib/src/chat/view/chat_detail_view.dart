@@ -117,11 +117,14 @@ class _ChatDetailViewState extends ConsumerState<ChatDetailView> {
             return Column(
               children: [
                 AppBar(
-                  leading: CircleAvatar(
-                    backgroundImage:
-                        CachedNetworkImageProvider(profile.photoUrl),
+                  leading: Center(
+                    child: CircleAvatar(
+                      backgroundImage:
+                          CachedNetworkImageProvider(profile.photoUrl),
+                    ),
                   ),
                   title: Text(profile.name),
+                  titleSpacing: 0.0,
                 ),
                 MessagesListView(
                   scrollController: _scrollController,
@@ -163,6 +166,9 @@ class _ChatDetailViewState extends ConsumerState<ChatDetailView> {
               ],
             );
           },
+          onError: (error, stackTrace) => Center(
+            child: Text("Open a chat"),
+          ),
         );
       },
     );

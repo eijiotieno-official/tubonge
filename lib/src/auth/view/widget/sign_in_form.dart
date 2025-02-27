@@ -1,6 +1,8 @@
+import 'dart:ui'; // for lerpDouble
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tubonge/core/widget/animated_text_view.dart';
 
 import '../../provider/toggle_sign_state_provider.dart';
 
@@ -17,7 +19,8 @@ class SignInForm extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _SignInFormState();
 }
 
-class _SignInFormState extends ConsumerState<SignInForm> {
+class _SignInFormState extends ConsumerState<SignInForm>
+    with TickerProviderStateMixin {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -48,7 +51,6 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   }
 
   Future<void> _handleSignIn() async {
-    // Trigger form validation
     if (_formKey.currentState?.validate() ?? false) {
       widget.onSignIn(
         _emailController.text.trim(),
@@ -61,99 +63,124 @@ class _SignInFormState extends ConsumerState<SignInForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    bool enabled = widget.enabled;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Interpolate spacing and text sizes based on available width.
+        double spacing = constraints.maxWidth < 300
+            ? 16.0
+            : constraints.maxWidth > 600
+                ? 24.0
+                : lerpDouble(16, 24, (constraints.maxWidth - 300) / 300)!;
+        double headlineFontSize = constraints.maxWidth < 300
+            ? 20.0
+            : constraints.maxWidth > 600
+                ? 28.0
+                : lerpDouble(20, 28, (constraints.maxWidth - 300) / 300)!;
+        double labelFontSize = constraints.maxWidth < 300
+            ? 14.0
+            : constraints.maxWidth > 600
+                ? 16.0
+                : lerpDouble(14, 16, (constraints.maxWidth - 300) / 300)!;
 
-    return Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 24.0,
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 16.0,
-            children: [
-              Text(
-                "Hello Again!",
-                style: theme.textTheme.headlineMedium,
-              ),
-              Text(
-                "We're happy to see you. Please sign in to continue.",
-                style: theme.textTheme.labelMedium,
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          TextFormField(
-            enabled: enabled,
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            validator: _emailValidator,
-            decoration: InputDecoration(
-              labelText: "Email",
+        return AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Header texts with animated text style
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AnimatedText(
+                      text: "Hello Again!",
+                      style: theme.textTheme.headlineMedium
+                              ?.copyWith(fontSize: headlineFontSize) ??
+                          TextStyle(fontSize: headlineFontSize),
+                    ),
+                    SizedBox(height: spacing / 2),
+                    AnimatedText(
+                      text:
+                          "We're happy to see you. Please sign in to continue.",
+                      style: theme.textTheme.labelMedium
+                              ?.copyWith(fontSize: labelFontSize) ??
+                          TextStyle(fontSize: labelFontSize),
+                    ),
+                  ],
+                ),
+                SizedBox(height: spacing),
+                TextFormField(
+                  enabled: widget.enabled,
+                  controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: _emailValidator,
+                  decoration: const InputDecoration(
+                    labelText: "Email",
+                  ),
+                  // Removed onChanged setState to avoid extra rebuilds.
+                ),
+                SizedBox(height: spacing),
+                TextFormField(
+                  enabled: widget.enabled,
+                  controller: _passwordController,
+                  keyboardType: TextInputType.text,
+                  obscureText: _obscurePassword,
+                  validator: _passwordValidator,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    suffixIcon: InkWell(
+                      onTap: _toggleObscurePassword,
+                      child: Icon(
+                        _obscurePassword
+                            ? Icons.remove_red_eye_rounded
+                            : Icons.visibility_off_rounded,
+                      ),
+                    ),
+                  ),
+                  // Removed onChanged setState.
+                ),
+                SizedBox(height: spacing),
+                if (!widget.enabled)
+                  Center(
+                    child: CircularProgressIndicator(
+                      strokeCap: StrokeCap.round,
+                    ),
+                  )
+                else
+                  FilledButton(
+                    onPressed: _handleSignIn,
+                    child: const Text("Sign In"),
+                  ),
+                SizedBox(height: spacing),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                        child: AnimatedText(text: "Don't have an account")),
+                    Flexible(
+                      child: TextButton(
+                        onPressed: () {
+                          if (widget.enabled) {
+                            ref.read(toggleSignStateProvider.notifier).state =
+                                ToggleSignState.signUp;
+                          }
+                        },
+                        child: const AnimatedText(text: "Create an account"),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-            onChanged: (value) => setState(() {}),
           ),
-          TextFormField(
-            enabled: enabled,
-            controller: _passwordController,
-            keyboardType: TextInputType.text,
-            obscureText: _obscurePassword,
-            validator: _passwordValidator,
-            decoration: InputDecoration(
-              labelText: "Password",
-              suffixIcon: InkWell(
-                onTap: _toggleObscurePassword,
-                child: Icon(
-                  _obscurePassword
-                      ? Icons.remove_red_eye_rounded
-                      : Icons.visibility_off_rounded,
-                ),
-              ),
-            ),
-            onChanged: (value) => setState(() {}),
-          ),
-          if (!enabled)
-            Center(
-              child: CircularProgressIndicator(
-                strokeCap: StrokeCap.round,
-              ),
-            )
-          else
-            FilledButton(
-              onPressed: _handleSignIn,
-              child: Text(
-                "Sign In",
-                style: TextStyle(
-                  fontSize: 18.0,
-                ),
-              ),
-            ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Flexible(
-                child: Text(
-                  "Don't have an account",
-                  style: theme.textTheme.labelMedium,
-                ),
-              ),
-              Flexible(
-                child: TextButton(
-                  onPressed: () {
-                    if (enabled) {
-                      ref.read(toggleSignStateProvider.notifier).state =
-                          ToggleSignState.signUp;
-                    }
-                  },
-                  child: Text("Create an account"),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
