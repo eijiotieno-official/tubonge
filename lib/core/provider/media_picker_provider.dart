@@ -23,11 +23,17 @@ class MediaPickerNotifier
     );
   }
 
+  void remove(PlatformFile file) {
+    final items = state.value ?? [];
+
+    items.remove(file);
+
+    state = AsyncValue.data(items);
+  }
+
   void clear() {
     state = AsyncValue.data([]);
   }
-
-  
 }
 
 final filePickerProvider =

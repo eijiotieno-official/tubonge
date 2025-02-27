@@ -27,8 +27,8 @@ class UnauthenticatedView extends StatelessWidget {
             operationState.isLoading || signInWithGoogleState.isLoading;
         final errorMessage = operationState.error?.toString();
 
-        return Scaffold(
-          body: LayoutBuilder(
+        return Material(
+          child: LayoutBuilder(
             builder: (context, constraints) {
               // Compute container width as 90% of the screen width,
               // then clamp it between 300 and 500 pixels.

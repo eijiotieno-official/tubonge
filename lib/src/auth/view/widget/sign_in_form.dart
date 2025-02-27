@@ -1,9 +1,10 @@
-import 'dart:ui'; // for lerpDouble
+import 'dart:ui';
+
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tubonge/core/widget/animated_text_view.dart';
 
+import '../../../../core/widget/animated_text_view.dart';
 import '../../provider/toggle_sign_state_provider.dart';
 
 class SignInForm extends ConsumerStatefulWidget {
@@ -61,26 +62,13 @@ class _SignInFormState extends ConsumerState<SignInForm>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Interpolate spacing and text sizes based on available width.
         double spacing = constraints.maxWidth < 300
             ? 16.0
             : constraints.maxWidth > 600
                 ? 24.0
                 : lerpDouble(16, 24, (constraints.maxWidth - 300) / 300)!;
-        double headlineFontSize = constraints.maxWidth < 300
-            ? 20.0
-            : constraints.maxWidth > 600
-                ? 28.0
-                : lerpDouble(20, 28, (constraints.maxWidth - 300) / 300)!;
-        double labelFontSize = constraints.maxWidth < 300
-            ? 14.0
-            : constraints.maxWidth > 600
-                ? 16.0
-                : lerpDouble(14, 16, (constraints.maxWidth - 300) / 300)!;
 
         return AnimatedSize(
           duration: const Duration(milliseconds: 300),
@@ -99,18 +87,12 @@ class _SignInFormState extends ConsumerState<SignInForm>
                   children: [
                     AnimatedText(
                       text: "Hello Again!",
-                      style: theme.textTheme.headlineMedium
-                              ?.copyWith(fontSize: headlineFontSize) ??
-                          TextStyle(fontSize: headlineFontSize),
+                      isTitle: true,
                     ),
                     SizedBox(height: spacing / 2),
                     AnimatedText(
-                      text:
-                          "We're happy to see you. Please sign in to continue.",
-                      style: theme.textTheme.labelMedium
-                              ?.copyWith(fontSize: labelFontSize) ??
-                          TextStyle(fontSize: labelFontSize),
-                    ),
+                        text:
+                            "We're happy to see you. Please sign in to continue."),
                   ],
                 ),
                 SizedBox(height: spacing),
@@ -122,7 +104,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
                   decoration: const InputDecoration(
                     labelText: "Email",
                   ),
-                  // Removed onChanged setState to avoid extra rebuilds.
+                  onChanged: (value) => setState(() {}),
                 ),
                 SizedBox(height: spacing),
                 TextFormField(
@@ -142,7 +124,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
                       ),
                     ),
                   ),
-                  // Removed onChanged setState.
+                  onChanged: (value) => setState(() {}),
                 ),
                 SizedBox(height: spacing),
                 if (!widget.enabled)
@@ -154,7 +136,7 @@ class _SignInFormState extends ConsumerState<SignInForm>
                 else
                   FilledButton(
                     onPressed: _handleSignIn,
-                    child: const Text("Sign In"),
+                    child: const AnimatedText(text: "Sign In"),
                   ),
                 SizedBox(height: spacing),
                 Row(

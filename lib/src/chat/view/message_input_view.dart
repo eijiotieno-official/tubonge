@@ -16,14 +16,23 @@ class MessageInputView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(
+        vertical: 32.0,
+        horizontal: 6.0,
+      ),
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(32.0),
+        ),
         child: Row(
           children: [
-            IconButton.filledTonal(
-              onPressed: onAttachmentTapped,
-              icon: Icon(
-                Icons.attachment_rounded,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: IconButton.filledTonal(
+                onPressed: onAttachmentTapped,
+                icon: Icon(
+                  Icons.attachment_rounded,
+                ),
               ),
             ),
             Expanded(
@@ -32,18 +41,19 @@ class MessageInputView extends StatelessWidget {
                 maxLines: null,
                 decoration: InputDecoration(
                   hintText: "Message",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(48.0),
-                  ),
+                  border: InputBorder.none,
                 ),
                 onChanged: onChanged,
               ),
             ),
             if (controller.text.trim().isNotEmpty)
-              IconButton.filledTonal(
-                onPressed: onSend,
-                icon: Icon(
-                  Icons.arrow_upward_rounded,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IconButton.filledTonal(
+                  onPressed: onSend,
+                  icon: Icon(
+                    Icons.arrow_upward_rounded,
+                  ),
                 ),
               ),
           ],

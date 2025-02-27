@@ -26,8 +26,8 @@ class PhotoView extends StatelessWidget {
       child: InkWell(
         onTap: onPickImage,
         child: SizedBox(
-          height: screenWidth * 0.225,
-          width: screenWidth * 0.3,
+          height: screenWidth * 0.25,
+          width: double.infinity,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16.0),
             child: _buildImage(screenWidth),

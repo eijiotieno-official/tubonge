@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/controller/upload_media_controller.dart';
 import '../../../core/provider/is_url_provider.dart';
 import '../../../core/provider/media_picker_provider.dart';
+import '../../../core/widget/animated_text_view.dart';
 import '../../../core/widget/error_message_view.dart';
 import '../controller/update_profile_controller.dart';
 import '../model/profile_model.dart';
@@ -119,8 +120,6 @@ class _CreateProfileFormState extends ConsumerState<ProfileFormView> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-
     final updateState = ref.watch(updateProfileProvider);
 
     final filePickerState = ref.watch(filePickerProvider);
@@ -139,70 +138,73 @@ class _CreateProfileFormState extends ConsumerState<ProfileFormView> {
         updateState.error?.toString() ?? mediaUploadState.error?.toString();
 
     return Material(
-      child: Center(
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24.0),
-            color: Theme.of(context).scaffoldBackgroundColor,
-            border: Border.all(
-              color: Colors.black.withOpacity(0.1),
-            ),
-          ),
-          child: SizedBox(
-            width: screenWidth * 0.3,
-            child: Padding(
-              padding: const EdgeInsets.all(36.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PhotoView(
-                      onPickImage: _pickImage,
-                      platformFile: platformFile,
-                      photoUrl: ref.read(isUrlProvider)(_profile.photoUrl)
-                          ? _profile.photoUrl
-                          : null,
-                    ),
-                    const SizedBox(height: 24.0),
-                    TextFormField(
-                      enabled: !isLoading,
-                      controller: _nameController,
-                      keyboardType: TextInputType.name,
-                      validator: _nameValidator,
-                      decoration: const InputDecoration(
-                        labelText: "Name",
+      child: LayoutBuilder(builder: (context, constraints) {
+        final computedWidth = (constraints.maxWidth * 0.9).clamp(300.0, 500.0);
+
+        return Center(
+          child: SingleChildScrollView(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: computedWidth,
+              curve: Curves.easeInOut,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24.0),
+                color: Theme.of(context).scaffoldBackgroundColor,
+                border: Border.all(
+                  color: Colors.black.withOpacity(0.1),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(36.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PhotoView(
+                        onPickImage: _pickImage,
+                        platformFile: platformFile,
+                        photoUrl: ref.read(isUrlProvider)(_profile.photoUrl)
+                            ? _profile.photoUrl
+                            : null,
                       ),
-                      onChanged: (value) {
-                        setState(() {
-                          _profile = _profile.copyWith(name: value);
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 24.0),
-                    ErrorMessageView(errorMessage: errorMessage),
-                    const SizedBox(height: 24.0),
-                    if (isLoading)
-                      const Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.0,
+                      const SizedBox(height: 24.0),
+                      TextFormField(
+                        enabled: !isLoading,
+                        controller: _nameController,
+                        keyboardType: TextInputType.name,
+                        validator: _nameValidator,
+                        decoration: const InputDecoration(
+                          labelText: "Name",
                         ),
-                      )
-                    else
-                      FilledButton(
-                        onPressed: () => _handleSubmit(platformFile),
-                        child: const Text(
-                          "Submit",
-                          style: TextStyle(fontSize: 18.0),
-                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            _profile = _profile.copyWith(name: value);
+                          });
+                        },
                       ),
-                  ],
+                      const SizedBox(height: 24.0),
+                      ErrorMessageView(errorMessage: errorMessage),
+                      const SizedBox(height: 24.0),
+                      if (isLoading)
+                        const Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                          ),
+                        )
+                      else
+                        FilledButton(
+                          onPressed: () => _handleSubmit(platformFile),
+                          child: const AnimatedText(text: "Submit"),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

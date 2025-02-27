@@ -3,6 +3,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widget/animated_text_view.dart';
 import '../../provider/toggle_sign_state_provider.dart';
 
 class SignUpForm extends ConsumerStatefulWidget {
@@ -75,7 +76,6 @@ class _SignUpFormState extends ConsumerState<SignUpForm>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     bool enabled = widget.enabled;
 
     return LayoutBuilder(
@@ -86,20 +86,6 @@ class _SignUpFormState extends ConsumerState<SignUpForm>
             : constraints.maxWidth > 600
                 ? 24.0
                 : lerpDouble(16, 24, (constraints.maxWidth - 300) / 300)!;
-
-        // Gradually interpolate headline font size between 20 and 28.
-        double headlineFontSize = constraints.maxWidth < 300
-            ? 20.0
-            : constraints.maxWidth > 600
-                ? 28.0
-                : lerpDouble(20, 28, (constraints.maxWidth - 300) / 300)!;
-
-        // Gradually interpolate label font size between 14 and 16.
-        double labelFontSize = constraints.maxWidth < 300
-            ? 14.0
-            : constraints.maxWidth > 600
-                ? 16.0
-                : lerpDouble(14, 16, (constraints.maxWidth - 300) / 300)!;
 
         return AnimatedSize(
           duration: const Duration(milliseconds: 300),
@@ -116,20 +102,16 @@ class _SignUpFormState extends ConsumerState<SignUpForm>
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      "Welcome Aboard!",
-                      style: theme.textTheme.headlineMedium
-                          ?.copyWith(fontSize: headlineFontSize),
+                    AnimatedText(
+                      text: "Welcome Aboard!",
+                      isTitle: true,
                     ),
                     SizedBox(height: spacing / 2),
-                    Text(
-                      "Let's get you started with a new account.",
-                      style: theme.textTheme.labelMedium
-                          ?.copyWith(fontSize: labelFontSize),
-                    ),
+                    AnimatedText(
+                        text: "Let's get you started with a new account."),
                   ],
                 ),
-                
+
                 SizedBox(height: spacing),
                 // Email Field
                 TextFormField(
@@ -140,6 +122,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm>
                   decoration: const InputDecoration(
                     labelText: "Email",
                   ),
+                  onChanged: (value) => setState(() {}),
                 ),
                 SizedBox(height: spacing),
                 // Password Field
@@ -159,6 +142,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm>
                       ),
                     ),
                   ),
+                  onChanged: (value) => setState(() {}),
                 ),
                 SizedBox(height: spacing),
                 // Confirm Password Field
@@ -178,6 +162,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm>
                       ),
                     ),
                   ),
+                  onChanged: (value) => setState(() {}),
                 ),
                 SizedBox(height: spacing),
                 // Action Button or Loading Indicator
@@ -190,10 +175,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm>
                 else
                   FilledButton(
                     onPressed: _handleSignUp,
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(fontSize: 18.0),
-                    ),
+                    child: const AnimatedText(text: "Sign Up"),
                   ),
                 SizedBox(height: spacing),
                 // Footer: Already have an account?
@@ -201,11 +183,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm>
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "Already have an account?",
-                      style: theme.textTheme.labelMedium
-                          ?.copyWith(fontSize: labelFontSize),
-                    ),
+                    AnimatedText(text: "Already have an account?"),
                     TextButton(
                       onPressed: () {
                         if (enabled) {
@@ -213,7 +191,7 @@ class _SignUpFormState extends ConsumerState<SignUpForm>
                               ToggleSignState.signIn;
                         }
                       },
-                      child: Text("Sign In"),
+                      child: AnimatedText(text: "Sign In"),
                     ),
                   ],
                 ),
