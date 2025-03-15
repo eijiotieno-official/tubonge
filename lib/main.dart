@@ -9,7 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/provider/theme_provider.dart';
 import 'firebase_options.dart';
-import 'src/auth/view/widget/auth_wrapper.dart';
+import 'src/auth/view/auth_wrapper_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,9 +33,14 @@ class MainApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(lightThemeProvider);
+
+    final darkTheme = ref.watch(darkThemeProvider);
+
     return MaterialApp(
-      theme: ref.watch(themeProvider),
-      home: AuthWrapper(),
+      theme: theme,
+      darkTheme: darkTheme,
+      home: AuthWrapperView(),
     );
   }
 }

@@ -21,15 +21,9 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -53,13 +47,35 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBnHnsDFC0G9wwKjvXDR98BsyHHoJ1Hlm8',
-    appId: '1:1025584618741:web:a414a85d6d9597a535f9bc',
+    apiKey: 'AIzaSyA674ze4C9Xe5YUFNnANPLigoRUgDvKZdI',
+    appId: '1:1025584618741:web:79024af55557f2d135f9bc',
     messagingSenderId: '1025584618741',
     projectId: 'test-a49af',
     authDomain: 'test-a49af.firebaseapp.com',
     databaseURL: 'https://test-a49af-default-rtdb.firebaseio.com',
     storageBucket: 'test-a49af.appspot.com',
-    measurementId: 'G-EMGDPKV3BN',
+    measurementId: 'G-KX92NJ46EH',
   );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyCUKycyTjqNmvMktT24kc-f6qu-ulCso9c',
+    appId: '1:1025584618741:ios:498cccb667b7b4f835f9bc',
+    messagingSenderId: '1025584618741',
+    projectId: 'test-a49af',
+    databaseURL: 'https://test-a49af-default-rtdb.firebaseio.com',
+    storageBucket: 'test-a49af.appspot.com',
+    androidClientId: '1025584618741-71ikj6d2f2575ot25elffijpv219lt4i.apps.googleusercontent.com',
+    iosClientId: '1025584618741-mp7rh2a7unetbcm5889ldet48djgu2uk.apps.googleusercontent.com',
+    iosBundleId: 'com.example.tubonge',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyCHgdtAC1upFx-CiOpI7vyqvQzy6-y5Bvs',
+    appId: '1:1025584618741:android:e4ce5c8703a3664a35f9bc',
+    messagingSenderId: '1025584618741',
+    projectId: 'test-a49af',
+    databaseURL: 'https://test-a49af-default-rtdb.firebaseio.com',
+    storageBucket: 'test-a49af.appspot.com',
+  );
+
 }

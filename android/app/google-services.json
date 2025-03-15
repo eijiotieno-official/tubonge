@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1025584618741",
+    "firebase_url": "https://test-a49af-default-rtdb.firebaseio.com",
+    "project_id": "test-a49af",
+    "storage_bucket": "test-a49af.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1025584618741:android:e4ce5c8703a3664a35f9bc",
+        "android_client_info": {
+          "package_name": "com.example.tubonge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1025584618741-2he44irob6nj4oc23cjqe5043irl6gv6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHgdtAC1upFx-CiOpI7vyqvQzy6-y5Bvs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1025584618741-2he44irob6nj4oc23cjqe5043irl6gv6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1025584618741-mp7rh2a7unetbcm5889ldet48djgu2uk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.tubonge"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
