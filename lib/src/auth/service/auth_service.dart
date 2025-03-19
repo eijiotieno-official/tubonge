@@ -144,11 +144,19 @@ class AuthService {
   }
 
   Future<Either<String, bool>> changePhoneNumber({
-    required String newPhoneNumber,
-    required String verificationId,
-    required String smsCode,
+    required PhoneModel? newPhone,
+    required String? verificationId,
+    required String? smsCode,
   }) async {
     try {
+      if (newPhone == null) {
+        return Left("Phone number is required.");
+      }
+
+      if (verificationId == null || smsCode == null || smsCode.isEmpty) {
+        return Left("Missing verification ID or SMS code.");
+      }
+
       final PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: verificationId,
         smsCode: smsCode,
@@ -185,17 +193,5 @@ class AuthService {
     }
   }
 
-  Either<String, User?> getCurrentUser() {
-    try {
-      final User? currentUser = _auth.currentUser;
-      if (currentUser != null) {
-        return Right(currentUser);
-      } else {
-        return Left('No user signed in.');
-      }
-    } catch (e) {
-      final message = _authErrorService.handleException(exception: e);
-      return Left(message);
-    }
-  }
+
 }

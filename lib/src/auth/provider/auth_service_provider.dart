@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../model/phone_model.dart';
 import '../service/auth_service.dart';
+import 'timer_provider.dart';
 
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
@@ -14,131 +15,228 @@ final verificationIdProvider =
 
 final resendTokenProvider = StateProvider.autoDispose<int?>((ref) => null);
 
-final verifyPhoneNumberProvider = FutureProvider.autoDispose<bool>((ref) async {
+class PhoneVerificationNotifier extends StateNotifier<AsyncValue<bool>> {
+  PhoneVerificationNotifier({
+    required this.ref,
+    required this.authService,
+  }) : super(const AsyncValue.data(false));
+
+  final Ref ref;
+  final AuthService authService;
+
+  Future<void> call() async {
+    try {
+      state = const AsyncValue.loading();
+
+      final phone = ref.read(phoneNumberProvider);
+
+      await authService.verifyPhoneNumber(
+        phone: phone,
+        verificationFailed: (e) {
+          state = AsyncValue.error(
+              "Verification failed: ${e.message}", StackTrace.current);
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          ref.read(verificationIdProvider.notifier).state = verificationId;
+          ref.read(resendTokenProvider.notifier).state = resendToken;
+          ref.read(timerProvider.notifier).startTimer();
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          ref.read(verificationIdProvider.notifier).state = verificationId;
+        },
+      );
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+}
+
+final phoneVerificationProvider = StateNotifierProvider.autoDispose<
+    PhoneVerificationNotifier, AsyncValue<bool>>((ref) {
   final authService = ref.read(authServiceProvider);
-  final phone = ref.watch(phoneNumberProvider);
-
-  final result = await authService.verifyPhoneNumber(
-    phone: phone,
-    verificationFailed: (e) {
-      throw Exception("Verification failed: ${e.message}");
-    },
-    codeSent: (String verificationId, int? resendToken) {
-      ref.read(verificationIdProvider.notifier).state = verificationId;
-      ref.read(resendTokenProvider.notifier).state = resendToken;
-    },
-    codeAutoRetrievalTimeout: (String verificationId) {
-      ref.read(verificationIdProvider.notifier).state = verificationId;
-    },
-  );
-
-  return result.fold(
-    (error) => throw Exception(error),
-    (success) => success,
+  return PhoneVerificationNotifier(
+    ref: ref,
+    authService: authService,
   );
 });
 
 final otpCodeProvider = StateProvider.autoDispose<String?>((ref) => null);
 
-final verifyCodeProvider =
-    FutureProvider.autoDispose<UserCredential>((ref) async {
-  final authService = ref.read(authServiceProvider);
+class CodeVerificationNotifier
+    extends StateNotifier<AsyncValue<UserCredential?>> {
+  CodeVerificationNotifier({
+    required this.ref,
+    required this.authService,
+  }) : super(const AsyncValue.data(null));
 
-  final verificationId = ref.watch(verificationIdProvider);
+  final Ref ref;
+  final AuthService authService;
 
-  final smsCode = ref.watch(otpCodeProvider);
+  Future<void> call() async {
+    state = const AsyncValue.loading();
 
-  final result = await authService.verifyCode(
-    verificationId: verificationId,
-    smsCode: smsCode,
-  );
+    final verificationId = ref.read(verificationIdProvider);
+    final smsCode = ref.read(otpCodeProvider);
 
-  return result.fold(
-    (error) => throw Exception(error),
-    (userCredential) => userCredential,
-  );
-});
-
-final resendCodeProvider = FutureProvider.autoDispose<bool>((ref) async {
-  final authService = ref.read(authServiceProvider);
-  final phone = ref.watch(phoneNumberProvider);
-  final resendToken = ref.watch(resendTokenProvider);
-
-  final result = await authService.resendCode(
-    phone: phone,
-    resendToken: resendToken,
-    verificationFailed: (e) {
-      throw Exception("Verification failed: ${e.message}");
-    },
-    codeSent: (String verificationId, int? resendToken) {
-      ref.read(verificationIdProvider.notifier).state = verificationId;
-      ref.read(resendTokenProvider.notifier).state = resendToken;
-    },
-    codeAutoRetrievalTimeout: (String verificationId) {
-      ref.read(verificationIdProvider.notifier).state = verificationId;
-    },
-  );
-
-  return result.fold(
-    (error) => throw Exception(error),
-    (success) => success,
-  );
-});
-
-final changePhoneNumberProvider = FutureProvider<bool>(
-  (ref) async {
-    final authService = ref.read(authServiceProvider);
-
-    final phone = ref.watch(phoneNumberProvider);
-
-    if (phone == null || phone.phoneNumber.isEmpty) {
-      throw Exception("Phone number is required.");
-    }
-
-    final verificationId = ref.watch(verificationIdProvider);
-
-    final smsCode = ref.watch(otpCodeProvider);
-
-    if (verificationId == null || smsCode == null || smsCode.isEmpty) {
-      throw Exception("Missing verification ID or SMS code.");
-    }
-
-    final result = await authService.changePhoneNumber(
-      newPhoneNumber: phone.phoneNumber,
+    final result = await authService.verifyCode(
       verificationId: verificationId,
       smsCode: smsCode,
     );
 
-    return result.fold(
-      (error) => throw Exception(error),
-      (success) => success,
+    state = result.fold(
+      (error) => AsyncValue.error(error, StackTrace.current),
+      (userCredential) => AsyncValue.data(userCredential),
     );
-  },
-);
+  }
+}
 
-final deleteAccountProvider = FutureProvider<bool>((ref) async {
+final codeVerificationProvider = StateNotifierProvider.autoDispose<
+    CodeVerificationNotifier, AsyncValue<UserCredential?>>((ref) {
   final authService = ref.read(authServiceProvider);
-  final result = await authService.deleteAccount();
-  return result.fold(
-    (error) => throw Exception(error),
-    (success) => success,
+  return CodeVerificationNotifier(
+    ref: ref,
+    authService: authService,
   );
 });
 
-final signOutProvider = FutureProvider<bool>((ref) async {
+class ResendCodeNotifier extends StateNotifier<AsyncValue<bool>> {
+  ResendCodeNotifier({
+    required this.ref,
+    required this.authService,
+  }) : super(const AsyncValue.data(false));
+
+  final Ref ref;
+  final AuthService authService;
+
+  Future<void> resendCode() async {
+    try {
+      state = const AsyncValue.loading();
+
+      final phone = ref.read(phoneNumberProvider);
+      final resendToken = ref.read(resendTokenProvider);
+
+      await authService.resendCode(
+        phone: phone,
+        resendToken: resendToken,
+        verificationFailed: (e) {
+          state = AsyncValue.error(
+              "Verification failed: ${e.message}", StackTrace.current);
+        },
+        codeSent: (String verificationId, int? newResendToken) {
+          ref.read(verificationIdProvider.notifier).state = verificationId;
+          ref.read(resendTokenProvider.notifier).state = newResendToken;
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          ref.read(verificationIdProvider.notifier).state = verificationId;
+        },
+      );
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+    }
+  }
+}
+
+final resendCodeProvider =
+    StateNotifierProvider.autoDispose<ResendCodeNotifier, AsyncValue<bool>>(
+        (ref) {
   final authService = ref.read(authServiceProvider);
-  final result = await authService.signOut();
-  return result.fold(
-    (error) => throw Exception(error),
-    (success) => success,
+  return ResendCodeNotifier(
+    ref: ref,
+    authService: authService,
   );
 });
 
-final currentUserProvider = Provider<User?>((ref) {
+// ChangePhoneNumber StateNotifier
+class ChangePhoneNumberNotifier extends StateNotifier<AsyncValue<bool>> {
+  ChangePhoneNumberNotifier({
+    required this.ref,
+    required this.authService,
+  }) : super(const AsyncValue.data(false));
+
+  final Ref ref;
+  final AuthService authService;
+
+  Future<void> call() async {
+    state = const AsyncValue.loading();
+
+    final phone = ref.read(phoneNumberProvider);
+    final verificationId = ref.read(verificationIdProvider);
+    final smsCode = ref.read(otpCodeProvider);
+
+    final result = await authService.changePhoneNumber(
+      newPhone: phone,
+      verificationId: verificationId,
+      smsCode: smsCode,
+    );
+
+    state = result.fold(
+      (error) => AsyncValue.error(error, StackTrace.current),
+      (success) => AsyncValue.data(success),
+    );
+  }
+}
+
+final changePhoneNumberProvider =
+    StateNotifierProvider<ChangePhoneNumberNotifier, AsyncValue<bool>>((ref) {
   final authService = ref.read(authServiceProvider);
-  final result = authService.getCurrentUser();
-  return result.fold(
-    (error) => throw Exception(error),
-    (user) => user,
+  return ChangePhoneNumberNotifier(
+    ref: ref,
+    authService: authService,
+  );
+});
+
+// DeleteAccount StateNotifier
+class DeleteAccountNotifier extends StateNotifier<AsyncValue<bool>> {
+  DeleteAccountNotifier({
+    required this.authService,
+  }) : super(const AsyncValue.data(false));
+
+  final AuthService authService;
+
+  Future<void> call() async {
+    state = const AsyncValue.loading();
+
+    final result = await authService.deleteAccount();
+
+    state = result.fold(
+      (error) => AsyncValue.error(error, StackTrace.current),
+      (success) => AsyncValue.data(success),
+    );
+  }
+}
+
+final deleteAccountProvider =
+    StateNotifierProvider<DeleteAccountNotifier, AsyncValue<bool>>((ref) {
+  final authService = ref.read(authServiceProvider);
+  return DeleteAccountNotifier(
+    authService: authService,
+  );
+});
+
+// SignOut StateNotifier
+class SignOutNotifier extends StateNotifier<AsyncValue<bool>> {
+  SignOutNotifier({
+    required this.authService,
+  }) : super(const AsyncValue.data(false));
+
+  final AuthService authService;
+
+  Future<void> call() async {
+    state = const AsyncValue.loading();
+
+    final result = await authService.signOut();
+
+    state = result.fold(
+      (error) => AsyncValue.error(error, StackTrace.current),
+      (success) => AsyncValue.data(success),
+    );
+  }
+}
+
+final signOutProvider =
+    StateNotifierProvider<SignOutNotifier, AsyncValue<bool>>((ref) {
+  final authService = ref.read(authServiceProvider);
+  return SignOutNotifier(
+    authService: authService,
   );
 });

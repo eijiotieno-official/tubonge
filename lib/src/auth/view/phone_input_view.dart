@@ -1,39 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
-class PhoneInputView extends StatelessWidget {
-  final TextEditingController controller;
-  final Function(PhoneNumber) onInputChanged;
-  const PhoneInputView(
-      {super.key, required this.controller, required this.onInputChanged});
+import '../../../core/view/error_message_view.dart';
+import '../../../core/view/tubonge_filled_button.dart';
+import '../model/phone_model.dart';
+import '../provider/auth_service_provider.dart';
+
+class PhoneInputView extends ConsumerWidget {
+  final bool isLoading;
+  final String? errorMessage;
+  final VoidCallback? onTap;
+  const PhoneInputView({
+    super.key,
+    this.errorMessage,
+    required this.isLoading,
+    this.onTap,
+  });
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        InternationalPhoneNumberInput(
-          textFieldController: controller,
-          isEnabled: true,
-          onInputChanged: onInputChanged,
-          autoFocus: true,
-          autoFocusSearch: true,
-          formatInput: true,
-          selectorTextStyle: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize,
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+      child: Column(
+        spacing: 16.0,
+        children: [
+          SizedBox(height: 8.0),
+          InternationalPhoneNumberInput(
+            isEnabled: isLoading == false,
+            onInputChanged: (phoneNumber) {
+              ref.read(phoneNumberProvider.notifier).state = PhoneModel(
+                isoCode: phoneNumber.isoCode ?? "",
+                dialCode: phoneNumber.dialCode ?? "",
+                phoneNumber: phoneNumber.phoneNumber ?? "",
+              );
+            },
+            autoFocus: true,
+            autoFocusSearch: true,
+            formatInput: true,
+            selectorTextStyle: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize,
+            ),
+            textStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+            autoValidateMode: AutovalidateMode.disabled,
+            selectorConfig: SelectorConfig(
+              showFlags: true,
+              setSelectorButtonAsPrefixIcon: true,
+              selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+              trailingSpace: false,
+            ),
           ),
-          textStyle: TextStyle(
-            fontWeight: FontWeight.bold,
+          ErrorMessageView(errorMessage: errorMessage),
+          const Spacer(),
+          TubongeFilledButton(
+            isExtended: true,
+            isLoading: isLoading,
+            onTap: onTap,
+            text: "Next",
           ),
-          autoValidateMode: AutovalidateMode.always,
-          selectorConfig: SelectorConfig(
-            showFlags: true,
-            setSelectorButtonAsPrefixIcon: true,
-            selectorType: PhoneInputSelectorType.DIALOG,
-            trailingSpace: false,
-          ),
-        ),
-      ],
+          SizedBox(height: 8.0),
+        ],
+      ),
     );
   }
 }
