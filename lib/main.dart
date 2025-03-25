@@ -8,9 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/provider/theme_provider.dart';
+import 'core/providers/theme_provider.dart';
 import 'firebase_options.dart';
-import 'src/auth/view/auth_wrapper_view.dart';
+import 'src/auth/views/auth_wrapper_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
