@@ -21,7 +21,7 @@ class PhoneInputView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         spacing: 16.0,
         children: [

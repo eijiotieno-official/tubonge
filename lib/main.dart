@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/providers/theme_provider.dart';
 import 'firebase_options.dart';
 import 'src/auth/views/auth_wrapper_view.dart';
 
@@ -32,18 +31,21 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MainApp()));
 }
 
-class MainApp extends ConsumerWidget {
+class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = ref.watch(lightThemeProvider);
-
-    final darkTheme = ref.watch(darkThemeProvider);
-
+  Widget build(BuildContext context) {
     return MaterialApp(
-      theme: theme,
-      darkTheme: darkTheme,
+      theme: ThemeData(
+        colorSchemeSeed: Colors.green,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        colorSchemeSeed: Colors.green,
+        brightness: Brightness.dark,
+      ),
+      themeMode: ThemeMode.system,
       home: AuthWrapperView(),
     );
   }

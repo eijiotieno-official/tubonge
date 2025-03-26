@@ -7,12 +7,12 @@ import '../models/message_model.dart';
 import 'message_view.dart';
 
 class MessagesListView extends StatelessWidget {
-  final AutoScrollController controller;
+  final AutoScrollController scrollController;
   final List<Message> messages;
   final String chatId;
   const MessagesListView(
       {super.key,
-      required this.controller,
+      required this.scrollController,
       required this.messages,
       required this.chatId});
 
@@ -20,7 +20,7 @@ class MessagesListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: GroupedListView(
-        controller: controller,
+        controller: scrollController,
         reverse: true,
         floatingHeader: true,
         elements: messages,
@@ -60,7 +60,7 @@ class MessagesListView extends StatelessWidget {
             child: MessageView(
               chatId: chatId,
               key: Key(element.id),
-              controller: controller,
+              controller: scrollController,
               message: element,
               index: index,
             ),

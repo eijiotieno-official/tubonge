@@ -112,7 +112,7 @@ class MessageService {
     );
   }
 
-  List<Message> sortItemsByDate(
+  static List<Message> sortItemsByDate(
     List<Message> messages, {
     bool ascending = true,
   }) {

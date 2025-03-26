@@ -3,9 +3,13 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as flutter_contacts;
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../core/services/cloud_functions_error_service.dart';
 import '../models/contact_model.dart';
 
 class ContactService {
+  final CloudFunctionsErrorService _cloudFunctionsErrorService =
+      CloudFunctionsErrorService();
+
   Future<Either<String, List<flutter_contacts.Contact>>>
       fetchLocalContacts() async {
     try {
@@ -99,7 +103,8 @@ class ContactService {
 
       return Right(registeredContacts);
     } catch (e) {
-      return Left(e.toString());
+      final message = _cloudFunctionsErrorService.handleException(e);
+      return Left(message);
     }
   }
 }

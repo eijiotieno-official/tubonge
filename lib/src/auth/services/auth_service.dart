@@ -58,6 +58,7 @@ class AuthService {
   }
 
   Future<Either<String, UserCredential>> verifyCode({
+    required PhoneModel phone,
     required String? verificationId,
     required String? smsCode,
   }) async {
@@ -72,6 +73,20 @@ class AuthService {
       );
       final UserCredential userCredential =
           await _auth.signInWithCredential(credential);
+
+      final User? user = userCredential.user;
+
+      UserModel model = UserModel.empty;
+
+      if (user != null) {
+        await _userService.authenticatedUserHandler(
+          model.copyWith(
+            id: user.uid,
+            phone: phone,
+          ),
+        );
+      }
+
       return Right(userCredential);
     } catch (e) {
       final message = _authErrorService.handleException(exception: e);
@@ -192,6 +207,4 @@ class AuthService {
       return Left(message);
     }
   }
-
-
 }

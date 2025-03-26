@@ -5,8 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/views/error_message_view.dart';
 import '../../../core/views/tubonge_filled_button.dart';
 import '../providers/auth_service_provider.dart';
-
-// here, show resend code when the timer has completed the count down to 60 seconds, othersie show a text widget showing the count down :
+import '../providers/timer_provider.dart';
 
 class CodeInputView extends ConsumerWidget {
   final bool isLoading;
@@ -21,15 +20,17 @@ class CodeInputView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final timerCount = ref.watch(timerProvider);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         spacing: 16.0,
         children: [
-          SizedBox(height: 8.0),
+          const SizedBox(height: 8.0),
           OtpTextField(
             autoFocus: true,
-            enabled: isLoading == false,
+            enabled: !isLoading,
             numberOfFields: 6,
             focusedBorderColor: Theme.of(context).colorScheme.primary,
             borderRadius: BorderRadius.circular(8.0),
@@ -39,7 +40,16 @@ class CodeInputView extends ConsumerWidget {
               debugPrint(code);
             },
           ),
-          TextButton(onPressed: () {}, child: Text("Resend Code")),
+          TextButton(
+            onPressed: timerCount == 0
+                ? () async {
+                    await ref.read(resendCodeProvider.notifier).resendCode();
+                  }
+                : null,
+            child: timerCount == 0
+                ? const Text("Resend Code")
+                : Text("Resend Code in $timerCount seconds"),
+          ),
           ErrorMessageView(errorMessage: errorMessage),
           const Spacer(),
           TubongeFilledButton(
@@ -48,7 +58,7 @@ class CodeInputView extends ConsumerWidget {
             onTap: onTap,
             text: "Confirm",
           ),
-          SizedBox(height: 8.0),
+          const SizedBox(height: 8.0),
         ],
       ),
     );

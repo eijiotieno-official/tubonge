@@ -147,4 +147,26 @@ class UserService {
       (updatedModel) => Right(updatedModel),
     );
   }
+
+  Stream<Either<String, UserModel>> streamUser(String userId) {
+    return _users
+        .doc(userId)
+        .snapshots()
+        .map<Either<String, UserModel>>((docSnapshot) {
+      if (docSnapshot.exists) {
+        try {
+          final data = docSnapshot.data() as Map<String, dynamic>;
+          final userModel = UserModel.fromMap(data);
+          return Right(userModel);
+        } catch (e) {
+          final errorMsg = 'Error parsing user data: $e';
+          return Left(errorMsg);
+        }
+      } else {
+        return Left('User not found.');
+      }
+    }).handleError((error) {
+      return Left('Stream error: $error');
+    });
+  }
 }

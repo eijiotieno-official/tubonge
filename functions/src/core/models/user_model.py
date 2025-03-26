@@ -1,44 +1,40 @@
 import json
 from typing import List, Optional
+from src.core.models.phone_model import Phone
 
 
 class UserModel:
     def __init__(
         self,
         id: str,
-        email: str,
-        photoUrl: str,
-        name: str,
+        phone: Phone,
+        photo: str,
         tokens: List[str],
     ):
         self.id = id
-        self.email = email
-        self.photoUrl = photoUrl
-        self.name = name
+        self.phone = phone
+        self.photo = photo
         self.tokens = tokens
 
     def copy_with(
         self,
         id: Optional[str] = None,
-        email: Optional[str] = None,
-        photoUrl: Optional[str] = None,
-        name: Optional[str] = None,
+        phone: Optional[Phone] = None,
+        photo: Optional[str] = None,
         tokens: Optional[List[str]] = None,
     ) -> "UserModel":
         return UserModel(
             id=id if id is not None else self.id,
-            email=email if email is not None else self.email,
-            photoUrl=photoUrl if photoUrl is not None else self.photoUrl,
-            name=name if name is not None else self.name,
+            phone=phone if phone is not None else self.phone,
+            photo=photo if photo is not None else self.photo,
             tokens=tokens if tokens is not None else self.tokens,
         )
 
     def to_map(self) -> dict:
         return {
             "id": self.id,
-            "email": self.email.to_map(),
-            "photoUrl": self.photoUrl,
-            "name": self.name,
+            "phone": self.phone.to_map(),
+            "photo": self.photo,
             "tokens": self.tokens,
         }
 
@@ -46,8 +42,7 @@ class UserModel:
     def from_map(data: dict) -> "UserModel":
         return UserModel(
             id=data.get("id", ""),
-            email=data.get("email"),
-            photoUrl=data.get("photoUrl", ""),
-            name=data.get("name", ""),
+            phone=Phone.from_map(data.get("phone", {})),
+            photo=data.get("photo", ""),
             tokens=data.get("tokens", []),
         )

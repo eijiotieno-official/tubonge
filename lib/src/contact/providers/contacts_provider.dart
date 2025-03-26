@@ -38,6 +38,7 @@ class ContactsNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
                   .toList();
 
               _logger.i('Fetched ${contacts.length} local contacts.');
+              
               if (contacts.isEmpty) {
                 state = AsyncValue.data([]);
                 _logger.i('No local contacts found.');

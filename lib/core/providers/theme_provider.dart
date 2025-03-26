@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final _themeData = ThemeData(
-  colorSchemeSeed: Colors.green.shade300,
+  colorSchemeSeed: Colors.green,
 );
 
 final lightThemeProvider = Provider<ThemeData>((ref) {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tubonge/src/chat/screens/chat_detail_screen.dart';
 
 import '../../../core/views/async_view.dart';
+import '../../chat/screens/chat_detail_screen.dart';
 import '../models/contact_model.dart';
 import '../providers/contacts_provider.dart';
 import '../views/contacts_list_view.dart';

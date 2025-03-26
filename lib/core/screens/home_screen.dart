@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../src/auth/providers/auth_service_provider.dart';
+import '../../src/contact/screens/contacts_screen.dart';
+
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -9,18 +12,50 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  Future<void> _handleMenuSelection(String value) async {
+    if (value == 'logout') {
+      await ref.read(signOutProvider.notifier).call();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Tubonge"),
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.search_rounded)),
-          IconButton(onPressed: () {}, icon: Icon(Icons.more_vert_rounded)),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.search_rounded),
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: _handleMenuSelection,
+            borderRadius: BorderRadius.circular(8.0),
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'logout',
+                  child: Text('Logout'),
+                ),
+              ];
+            },
+          ),
         ],
       ),
-      floatingActionButton:
-          FloatingActionButton(onPressed: () {}, child: Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return ContactsScreen();
+              },
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
