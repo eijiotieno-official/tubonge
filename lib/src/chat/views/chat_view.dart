@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/user_info_provider.dart';
+import '../../contact/models/contact_model.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../screens/chat_detail_screen.dart';
@@ -13,9 +14,9 @@ class ChatView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sortedMessages = MessageService.sortItemsByDate(chat.messages);
+    final List<Message> sortedMessages = MessageService.sortItemsByDate(chat.messages);
 
-    final message = sortedMessages.isNotEmpty ? sortedMessages.last : null;
+    final Message? message = sortedMessages.isNotEmpty ? sortedMessages.last : null;
 
     String? text;
 
@@ -34,7 +35,7 @@ class ChatView extends ConsumerWidget {
       );
     }
 
-    final userInfoAsync = ref.watch(userInfoProvider(chat.chatId));
+    final AsyncValue<ContactModel> userInfoAsync = ref.watch(userInfoProvider(chat.chatId));
 
     return userInfoAsync.when(
       data: (contact) => ListTile(

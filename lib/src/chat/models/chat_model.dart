@@ -25,15 +25,13 @@ class Chat {
   Map<String, dynamic> toMap() {
     return {
       'chatId': chatId,
-      'messages': messages.map((x) => x.toMap()).toList(),
     };
   }
 
   factory Chat.fromMap(Map<String, dynamic> map) {
     return Chat(
       chatId: map['chatId'] ?? '',
-      messages:
-          List<Message>.from(map['messages']?.map((x) => Message.fromMap(x))),
+      messages: [],
     );
   }
 

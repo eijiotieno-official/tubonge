@@ -32,47 +32,44 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
 
     return AsyncView(
       asyncValue: chatsAsync,
-      onData: (chats) {
+      builder: (chats) {
         final Chat? thisChat =
             chats.firstWhereOrNull((test) => test.chatId == widget.chatId);
 
-        if (thisChat == null) {
-          return SizedBox.shrink();
-        } else {
-          final AsyncValue<ContactModel> userInfoAsync =
-              ref.watch(userInfoProvider(widget.chatId));
+        final AsyncValue<ContactModel> userInfoAsync =
+            ref.watch(userInfoProvider(widget.chatId));
 
-          return AsyncView(
-            asyncValue: userInfoAsync,
-            onData: (contact) {
-              final List<Message> messages = MessageService.sortItemsByDate(
-                thisChat.messages,
-                ascending: false,
-              );
+        return AsyncView(
+          asyncValue: userInfoAsync,
+          builder: (contact) {
+            final List<Message> messages = MessageService.sortItemsByDate(
+              thisChat?.messages ?? [],
+              ascending: false,
+            );
 
-              return Scaffold(
-                appBar: AppBar(
-                  titleSpacing: 0.0,
-                  title: ListTile(
-                    leading: AvatarView(imageUrl: contact.photo),
-                    title: Text(contact.name),
-                  ),
+            return Scaffold(
+              appBar: AppBar(
+                titleSpacing: 0.0,
+                title: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: AvatarView(imageUrl: contact.photo),
+                  title: Text(contact.name),
                 ),
-                body: SafeArea(
-                  child: Column(
-                    children: [
-                      MessagesListView(
-                          scrollController: _scrollController,
-                          messages: messages,
-                          chatId: widget.chatId),
-                      MessageInputView(chatId: widget.chatId),
-                    ],
-                  ),
+              ),
+              body: SafeArea(
+                child: Column(
+                  children: [
+                    MessagesListView(
+                        scrollController: _scrollController,
+                        messages: messages,
+                        chatId: widget.chatId),
+                    MessageInputView(chatId: widget.chatId),
+                  ],
                 ),
-              );
-            },
-          );
-        }
+              ),
+            );
+          },
+        );
       },
     );
   }

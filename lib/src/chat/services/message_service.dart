@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/services/firestore_error_service.dart';
 import '../models/message_model.dart';
 
 class MessageService {
   final FirestoreErrorService _firestoreErrorService = FirestoreErrorService();
+
+  final String? _currentUser = FirebaseAuth.instance.currentUser?.uid;
 
   CollectionReference _chats(String userId) => FirebaseFirestore.instance
       .collection("users")
@@ -20,13 +23,17 @@ class MessageService {
 
   Either<String, Message> createMessage(Message message) {
     try {
+      if (_currentUser == null) {
+        return Left("User not log in");
+      }
+
       final docRef = _messages(
-        userId: message.sender,
+        userId: _currentUser,
         chatId: message.receiver,
       ).doc();
 
       final updatedMessage = message.copyWith(
-        sender: message.sender,
+        sender: _currentUser,
         id: docRef.id,
         status: message.receiver == message.sender
             ? MessageStatus.seen

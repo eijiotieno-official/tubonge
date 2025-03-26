@@ -38,12 +38,15 @@ class PhoneInputView extends ConsumerWidget {
             autoFocus: true,
             autoFocusSearch: true,
             formatInput: true,
+            searchBoxDecoration: InputDecoration(
+              prefixIcon: Icon(Icons.search_rounded),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
             selectorTextStyle: TextStyle(
               color: Theme.of(context).colorScheme.primary,
               fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize,
-            ),
-            textStyle: TextStyle(
-              fontWeight: FontWeight.bold,
             ),
             autoValidateMode: AutovalidateMode.disabled,
             selectorConfig: SelectorConfig(
@@ -51,6 +54,7 @@ class PhoneInputView extends ConsumerWidget {
               setSelectorButtonAsPrefixIcon: true,
               selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
               trailingSpace: false,
+              useBottomSheetSafeArea: true,
             ),
           ),
           ErrorMessageView(errorMessage: errorMessage),

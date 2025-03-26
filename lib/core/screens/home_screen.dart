@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../src/auth/providers/auth_service_provider.dart';
+import '../../src/chat/views/chats_list_view.dart';
 import '../../src/contact/screens/contacts_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -43,6 +44,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
+      body: ChatsListView(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

@@ -14,7 +14,7 @@ class AuthWrapperView extends ConsumerWidget {
     final statusValue = ref.watch(authStatusProvider);
     return AsyncView(
       asyncValue: statusValue,
-      onData: (isAuthenticated) {
+      builder: (isAuthenticated) {
         if (isAuthenticated == false) {
           return const AuthScreen();
         } else {

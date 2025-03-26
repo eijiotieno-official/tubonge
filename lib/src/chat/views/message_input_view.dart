@@ -1,5 +1,14 @@
+import 'package:dartz/dartz.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tubonge/src/chat/models/chat_model.dart';
+
+import '../models/message_model.dart';
+import '../providers/chat_service_provider.dart';
+import '../providers/chats_provider.dart';
+import '../providers/send_message_provider.dart';
 
 class MessageInputView extends ConsumerStatefulWidget {
   final String chatId;
@@ -14,22 +23,96 @@ class MessageInputView extends ConsumerStatefulWidget {
 }
 
 class _MessageInputViewState extends ConsumerState<MessageInputView> {
+  @override
+  void initState() {
+    super.initState();
+    _createChat();
+  }
+
+  Future<void> _createChat() async {
+    await Future.delayed(Duration(milliseconds: 100));
+
+    if (!_chatAlreadyExists) {
+      final String? currentUser = FirebaseAuth.instance.currentUser?.uid;
+
+      if (currentUser != null) {
+        ref
+            .read(chatsServiceProvider)
+            .createChat(userId: currentUser, chatId: widget.chatId);
+      }
+    }
+  }
+
+  bool get _chatAlreadyExists {
+    final AsyncValue<List<Chat>> chatsAsync = ref.read(chatsProvider);
+
+    final List<Chat> chats = chatsAsync.value ?? [];
+
+    return chats.any((chat) => chat.chatId == widget.chatId);
+  }
+
   final TextEditingController _textEditingController = TextEditingController();
 
   bool get _isValidToSend => _textEditingController.text.trim().isNotEmpty;
 
-  void _onImageTapped() {
-    debugPrint("Image");
+  PlatformFile? _file;
+
+  void _pickFile() {}
+
+  void _removeFile() {
+    setState(() {
+      _file = null;
+    });
   }
 
-  void _onSendTapped() {
-    debugPrint("Send");
+  Message? _message;
+
+  void _typing(String text) {
+    if (_message == null) {
+      setState(() {
+        _message = _file == null ? TextMessage.empty() : ImageMessage.empty();
+      });
+    } else {
+      final message = _message;
+      if (message is TextMessage) {
+        setState(() {
+          _message = message.copyWith(text: text);
+        });
+      } else if (message is ImageMessage) {
+        setState(() {
+          _message = message.copyWith(text: text);
+        });
+      }
+    }
+  }
+
+  Future<void> _send() async {
+    await _createChat().then(
+      (_) {
+        if (_message != null) {
+          final Message updatedMessage =
+              _message!.copyWith(receiver: widget.chatId);
+
+          final Either<String, Message> result =
+              ref.read(sendMessageProvider(updatedMessage));
+
+          if (result.isRight()) {
+            setState(() {
+              _textEditingController.clear();
+              _message = null;
+              _file = null;
+            });
+          }
+        }
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final maxHeight = MediaQuery.of(context).size.height * 0.2;
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: DecoratedBox(
@@ -53,7 +136,7 @@ class _MessageInputViewState extends ConsumerState<MessageInputView> {
       Row(
         children: [
           IconButton(
-            onPressed: _onImageTapped,
+            onPressed: _pickFile,
             icon: Icon(
               Icons.image_rounded,
               color: Colors.transparent,
@@ -74,14 +157,14 @@ class _MessageInputViewState extends ConsumerState<MessageInputView> {
                     hintText: "Message",
                     border: InputBorder.none,
                   ),
-                  onChanged: (value) => setState(() {}),
+                  onChanged: _typing,
                 ),
               ),
             ),
           ),
           if (_isValidToSend)
             IconButton(
-              onPressed: _onSendTapped,
+              onPressed: _send,
               icon: Icon(
                 Icons.arrow_upward_rounded,
                 color: Colors.transparent,
@@ -97,12 +180,12 @@ class _MessageInputViewState extends ConsumerState<MessageInputView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton.filled(
-                onPressed: _onImageTapped,
+                onPressed: _pickFile,
                 icon: Icon(Icons.image_rounded),
               ),
               if (_isValidToSend)
                 IconButton.filled(
-                  onPressed: _onSendTapped,
+                  onPressed: _send,
                   icon: Icon(Icons.arrow_upward_rounded),
                 ),
             ],

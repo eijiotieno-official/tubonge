@@ -1,10 +1,10 @@
 enum MessageType {
   text,
-  audio,
+  // audio,
   image,
-  video,
-  voice,
-  document,
+  // video,
+  // voice,
+  // document,
   none,
 }
 
@@ -91,6 +91,32 @@ abstract class Message {
         return ImageMessage.fromMap(map);
       default:
         throw Exception('Unknown MessageType: $messageType');
+    }
+  }
+
+  static Message? empty(MessageType type) {
+    switch (type) {
+      case MessageType.text:
+        return TextMessage(
+          text: "",
+          id: "",
+          sender: "",
+          receiver: "",
+          status: MessageStatus.none,
+          timeSent: DateTime.now(),
+        );
+      case MessageType.image:
+        return ImageMessage(
+          text: null,
+          id: "",
+          sender: "",
+          receiver: "",
+          status: MessageStatus.none,
+          timeSent: DateTime.now(),
+          imageUri: "",
+        );
+      case MessageType.none:
+        return null;
     }
   }
 }

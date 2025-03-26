@@ -43,11 +43,11 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final contactsValue = ref.watch(contactsProvider);
+    final AsyncValue<List<ContactModel>> contactsValue = ref.watch(contactsProvider);
 
     return AsyncView(
       asyncValue: contactsValue,
-      onData: (data) {
+      builder: (data) {
         final contacts = _searchQuery.isEmpty
             ? data
             : data

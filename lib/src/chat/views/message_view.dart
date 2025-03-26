@@ -30,19 +30,19 @@ class _MessageViewState extends ConsumerState<MessageView> {
   Widget build(BuildContext context) {
     final message = widget.message;
 
-    final fromCurrentUser =
+    final bool fromCurrentUser =
         message.sender == FirebaseAuth.instance.currentUser?.uid;
 
-    final alignment =
+    final Alignment alignment =
         fromCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
 
-    final showStatus = fromCurrentUser;
+    final bool showStatus = fromCurrentUser;
 
-    final color = fromCurrentUser
+    final Color color = fromCurrentUser
         ? Theme.of(context).hoverColor
         : Theme.of(context).colorScheme.primaryContainer;
 
-    final isSelected = ref
+    final bool isSelected = ref
         .read(selectedMessagesProvider.notifier)
         .isMessageSelected(chatId: widget.chatId, messageId: message.id);
 

@@ -12,20 +12,14 @@ class ChatService {
       .doc(userId)
       .collection("chats");
 
-  Future<Either<String, bool>> createChat(
-      {required String userId, required String chatId}) async {
+  Either<String, bool> createChat(
+      {required String userId, required String chatId}) {
     try {
-      final chatResult = await _chats(userId).doc(chatId).get();
+      _chats(userId).doc(chatId).set({
+        "chatId": chatId,
+      });
 
-      if (chatResult.exists == false) {
-        await _chats(userId).doc(chatId).set({
-          "chatId": chatId,
-        });
-
-        return Right(true);
-      }
-
-      return Right(false);
+      return Right(true);
     } catch (e) {
       final message = _firestoreErrorService.handleException(e);
       return Left(message);

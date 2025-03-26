@@ -20,10 +20,11 @@ class ContactService {
             permissionResult.swap().getOrElse(() => 'Permission denied'));
       }
 
-      final contacts = await flutter_contacts.FlutterContacts.getContacts(
-          withProperties: true);
+      final List<flutter_contacts.Contact> contacts =
+          await flutter_contacts.FlutterContacts.getContacts(
+              withProperties: true);
 
-      final filteredContacts = contacts
+      final List<flutter_contacts.Contact> filteredContacts = contacts
           .where((contact) =>
               contact.name.first.isNotEmpty && contact.phones.isNotEmpty)
           .map((contact) {
@@ -31,14 +32,16 @@ class ContactService {
           phone.number = phone.number.replaceAll(' ', '');
           return phone;
         }).toList();
+
         return contact;
       }).toList();
 
       // Remove duplicate contacts
-      final uniqueContacts = <flutter_contacts.Contact>[];
-      final contactSet = <String>{};
+      final List<flutter_contacts.Contact> uniqueContacts =
+          <flutter_contacts.Contact>[];
+      final Set<String> contactSet = <String>{};
       for (var contact in filteredContacts) {
-        final contactKey =
+        final String contactKey =
             '${contact.name.first}${contact.name.last}${contact.phones.map((phone) => phone.number).join()}';
         if (!contactSet.contains(contactKey)) {
           contactSet.add(contactKey);
@@ -55,7 +58,7 @@ class ContactService {
   // Method to check if the contacts permission is granted using permission_handler
   Future<Either<String, bool>> isPermissionGranted() async {
     try {
-      final status = await Permission.contacts.status;
+      final PermissionStatus status = await Permission.contacts.status;
       if (status.isGranted) {
         return Right(true);
       } else if (status.isDenied || status.isRestricted) {
@@ -71,7 +74,7 @@ class ContactService {
   // Method to request permission to access contacts using permission_handler
   Future<Either<String, bool>> requestContactPermission() async {
     try {
-      final status = await Permission.contacts.request();
+      final PermissionStatus status = await Permission.contacts.request();
       if (status.isGranted) {
         return Right(true);
       } else if (status.isDenied || status.isRestricted) {
@@ -97,7 +100,8 @@ class ContactService {
       final HttpsCallableResult response = await callable.call(body);
 
       final data = response.data;
-      final registeredContacts = (data['registeredContacts'] as List)
+      
+      final List<ContactModel> registeredContacts = (data['registeredContacts'] as List)
           .map((contact) => ContactModel.fromJson(contact))
           .toList();
 

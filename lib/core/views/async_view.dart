@@ -1,38 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// A reusable widget for handling asynchronous states (`AsyncValue`) like data, loading, and error.
 class AsyncView<T> extends StatelessWidget {
-  final AsyncValue<T> asyncValue;
-  final Widget Function(T data) onData;
-  final Widget? loading;
-  final Widget Function(Object error, StackTrace? stackTrace)? onError;
-
   const AsyncView({
     super.key,
     required this.asyncValue,
-    required this.onData,
-    this.onError,
-    this.loading,
+    required this.builder,
+    this.loadingWidget,
+    this.errorBuilder,
   });
+
+  /// Function to build the UI for error states.
+  final Widget Function(Object error, StackTrace? stackTrace)? errorBuilder;
+
+  /// The current asynchronous value representing the state.
+  final AsyncValue<T> asyncValue;
+
+  /// Function to build the UI when data is available.
+  final Widget Function(T data) builder;
+
+  /// Optional custom widget to display during loading.
+  final Widget? loadingWidget;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       child: asyncValue.when(
-        data: onData,
-        loading: () => loading ??
-            Center(
+        // Render the builder for the data state.
+        data: builder,
+
+        // Display the custom loading widget or a default progress indicator.
+        loading: () =>
+            loadingWidget ??
+            const Center(
               child: CircularProgressIndicator(
                 strokeCap: StrokeCap.round,
               ),
             ),
+
+        // Render the custom error builder or a default error message.
         error: (error, stackTrace) =>
-            onError?.call(error, stackTrace) ??
+            errorBuilder?.call(error, stackTrace) ??
             Center(
               child: SelectableText(
                 '$error',
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.error,
                 ),
               ),
             ),

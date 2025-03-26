@@ -1,32 +1,27 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
 
 import '../models/message_model.dart';
 import '../services/message_service.dart';
 import 'message_service_provider.dart';
 
-class SendMessageNotifier extends StateNotifier<AsyncValue<Message?>> {
-  final MessageService _messageService;
+final Logger _logger = Logger();
 
-  SendMessageNotifier(this._messageService)
-      : super(const AsyncValue.data(null));
+final sendMessageProvider = Provider.family<Either<String, Message>, Message>(
+  (ref, message) {
+    final MessageService messageService = ref.watch(messageServiceProvider);
 
-  void sendMessage(Message message) {
-    state = const AsyncValue.loading();
+    _logger.i("Sending message: $message");
 
-    final result = _messageService.createMessage(message);
+    final Either<String, Message> result =
+        messageService.createMessage(message);
 
     result.fold(
-      (error) => state = AsyncValue.error(error, StackTrace.current),
-      (sentMessage) => state = AsyncValue.data(sentMessage),
+      (error) => _logger.e("Error sending message: $error"),
+      (sentMessage) => _logger.i("Message sent successfully: $sentMessage"),
     );
-  }
-}
 
-final sendMessageProvider =
-    StateNotifierProvider<SendMessageNotifier, AsyncValue<Message?>>(
-  (ref) {
-    final messageService = ref.watch(messageServiceProvider);
-    return SendMessageNotifier(messageService);
+    return result;
   },
 );
-
