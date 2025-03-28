@@ -1,6 +1,5 @@
-from functions.src.core.util.firebase_collections import *
-from src.message.model.base.message import *
-from src.message.model.enum.message_status import *
+from src.core.utils.firebase_collections import *
+from src.message.models.message import *
 import logging
 
 # Set up the logger

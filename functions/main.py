@@ -8,3 +8,4 @@ logger = logging.getLogger(__name__)
 initialize_app()
 
 from src.contact.functions.request_registered_contacts_fxn import *
+from src.message.functions.on_message_created_fxn import *

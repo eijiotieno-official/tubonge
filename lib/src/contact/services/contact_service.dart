@@ -100,15 +100,44 @@ class ContactService {
       final HttpsCallableResult response = await callable.call(body);
 
       final data = response.data;
-      
-      final List<ContactModel> registeredContacts = (data['registeredContacts'] as List)
-          .map((contact) => ContactModel.fromJson(contact))
-          .toList();
+
+      final List<ContactModel> registeredContacts =
+          (data['registeredContacts'] as List)
+              .map((contact) => ContactModel.fromJson(contact))
+              .toList();
 
       return Right(registeredContacts);
     } catch (e) {
       final message = _cloudFunctionsErrorService.handleException(e);
       return Left(message);
+    }
+  }
+
+  Future<Either<String, List<ContactModel>>> loadContacts() async {
+    try {
+      final permissionResult = await requestContactPermission();
+      return await permissionResult.fold(
+        (error) async => Left(error),
+        (success) async {
+          final localResult = await fetchLocalContacts();
+          return await localResult.fold(
+            (error) async => Left(error),
+            (contactsRaw) async {
+              final contacts = contactsRaw
+                  .map((contact) => ContactModel.fromContact(contact))
+                  .toList();
+
+              if (contacts.isEmpty) {
+                return Right([]);
+              } else {
+                return await getRegisteredContacts(contacts);
+              }
+            },
+          );
+        },
+      );
+    } catch (e) {
+      return Left(e.toString());
     }
   }
 }

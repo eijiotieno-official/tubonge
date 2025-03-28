@@ -3,12 +3,11 @@ from firebase_functions.firestore_fn import (
     Event,
     DocumentSnapshot,
 )
-from src.message.model.base.message import *
-from src.message.service.get_tokens import *
-from src.message.service.update_message_status import *
-from src.message.model.enum.message_status import *
-from src.message.service.send_notification import *
-from src.message.service.create_copy_for_receiver import *
+from src.message.models.message import *
+from src.message.services.get_tokens import *
+from src.message.services.update_message_status import *
+from src.message.services.send_notification import *
+from src.message.services.create_copy_for_receiver import *
 import logging
 
 # Set up logger
@@ -41,14 +40,15 @@ def on_message_created(event: Event[DocumentSnapshot]) -> None:
             update_message_status(message=message, new_status=MessageStatus.sent)
 
             # Get receiver tokens and send notifications
-            tokens, name, photoUrl = get_tokens(user_id=message.receiver)
+            tokens, phoneNumber, photo = get_tokens(user_id=message.receiver)
 
             # Prepare payload for notifications
             payload = {
                 "data": {
                     "sender_id": message.sender,
-                    "sender_name": name,
-                    "sender_photoUrl": photoUrl,
+                    "receiver_id": message.receiver,
+                    "sender_phoneNumber": phoneNumber,
+                    "sender_photo": photo,
                     "message_id": message.id,
                     "message_text": message.text,
                     "type": "text",

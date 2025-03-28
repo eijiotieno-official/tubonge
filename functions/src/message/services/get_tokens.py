@@ -1,6 +1,6 @@
 from typing import List, Tuple
-from functions.src.core.util.firebase_collections import FirebaseCollections
-from src.core.model.user import UserModel
+from src.core.utils.firebase_collections import FirebaseCollections
+from src.core.models.user_model import UserModel
 import logging
 
 # Set up the logger
@@ -31,7 +31,7 @@ def get_tokens(user_id: str) -> Tuple[List[str], str, str]:
             f"User tokens and phone fetched successfully for user ID: {user_id}"
         )
 
-        return user.tokens, user.name, user.photoUrl
+        return user.tokens, user.phone.phone_number, user.photo
 
     except Exception as e:
         # Log the error

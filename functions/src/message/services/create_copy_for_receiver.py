@@ -1,5 +1,5 @@
-from functions.src.core.util.firebase_collections import FirebaseCollections
-from src.message.model.base.message import Message
+from src.core.utils.firebase_collections import FirebaseCollections
+from src.message.models.message import Message
 import logging
 
 

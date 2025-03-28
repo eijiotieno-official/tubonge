@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import '../models/message_model.dart';
+import '../providers/message_service_provider.dart';
 import '../providers/selected_messages_provider.dart';
-import 'image_message_view.dart';
 import 'text_message_view.dart';
 
 class MessageView extends ConsumerStatefulWidget {
@@ -26,6 +26,24 @@ class MessageView extends ConsumerStatefulWidget {
 }
 
 class _MessageViewState extends ConsumerState<MessageView> {
+  @override
+  void initState() {
+    super.initState();
+    _updateStatus();
+  }
+
+  void _updateStatus() {
+    final message = widget.message;
+
+    if (message.status != MessageStatus.seen &&
+        message.sender != FirebaseAuth.instance.currentUser?.uid) {
+      ref.read(messageServiceProvider).onMessageSeen(
+          userId: message.sender,
+          chatId: message.receiver,
+          messageId: message.id);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final message = widget.message;
@@ -81,12 +99,6 @@ class _MessageViewState extends ConsumerState<MessageView> {
                   children: [
                     if (message is TextMessage)
                       TextMessageView(
-                        key: Key(message.id),
-                        message: message,
-                        showStatus: showStatus,
-                      )
-                    else if (message is ImageMessage)
-                      ImageMessageView(
                         key: Key(message.id),
                         message: message,
                         showStatus: showStatus,

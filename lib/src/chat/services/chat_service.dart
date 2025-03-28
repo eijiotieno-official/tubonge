@@ -17,7 +17,7 @@ class ChatService {
     try {
       _chats(userId).doc(chatId).set({
         "chatId": chatId,
-      });
+      }, SetOptions(merge: true));
 
       return Right(true);
     } catch (e) {

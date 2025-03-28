@@ -1,10 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tubonge/src/chat/models/chat_model.dart';
 
+import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../providers/chat_service_provider.dart';
 import '../providers/chats_provider.dart';
@@ -39,6 +38,10 @@ class _MessageInputViewState extends ConsumerState<MessageInputView> {
         ref
             .read(chatsServiceProvider)
             .createChat(userId: currentUser, chatId: widget.chatId);
+
+        ref
+            .read(chatsServiceProvider)
+            .createChat(userId: widget.chatId, chatId: currentUser);
       }
     }
   }
@@ -55,30 +58,16 @@ class _MessageInputViewState extends ConsumerState<MessageInputView> {
 
   bool get _isValidToSend => _textEditingController.text.trim().isNotEmpty;
 
-  PlatformFile? _file;
-
-  void _pickFile() {}
-
-  void _removeFile() {
-    setState(() {
-      _file = null;
-    });
-  }
-
   Message? _message;
 
   void _typing(String text) {
     if (_message == null) {
       setState(() {
-        _message = _file == null ? TextMessage.empty() : ImageMessage.empty();
+        _message = TextMessage.empty();
       });
     } else {
       final message = _message;
       if (message is TextMessage) {
-        setState(() {
-          _message = message.copyWith(text: text);
-        });
-      } else if (message is ImageMessage) {
         setState(() {
           _message = message.copyWith(text: text);
         });
@@ -100,7 +89,6 @@ class _MessageInputViewState extends ConsumerState<MessageInputView> {
             setState(() {
               _textEditingController.clear();
               _message = null;
-              _file = null;
             });
           }
         }
@@ -136,7 +124,7 @@ class _MessageInputViewState extends ConsumerState<MessageInputView> {
       Row(
         children: [
           IconButton(
-            onPressed: _pickFile,
+            onPressed: null,
             icon: Icon(
               Icons.image_rounded,
               color: Colors.transparent,
@@ -180,7 +168,7 @@ class _MessageInputViewState extends ConsumerState<MessageInputView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton.filled(
-                onPressed: _pickFile,
+                onPressed: null,
                 icon: Icon(Icons.image_rounded),
               ),
               if (_isValidToSend)

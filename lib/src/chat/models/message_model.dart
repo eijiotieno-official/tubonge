@@ -1,7 +1,7 @@
 enum MessageType {
   text,
   // audio,
-  image,
+  // image,
   // video,
   // voice,
   // document,
@@ -87,8 +87,6 @@ abstract class Message {
     switch (messageType) {
       case MessageType.text:
         return TextMessage.fromMap(map);
-      case MessageType.image:
-        return ImageMessage.fromMap(map);
       default:
         throw Exception('Unknown MessageType: $messageType');
     }
@@ -104,16 +102,6 @@ abstract class Message {
           receiver: "",
           status: MessageStatus.none,
           timeSent: DateTime.now(),
-        );
-      case MessageType.image:
-        return ImageMessage(
-          text: null,
-          id: "",
-          sender: "",
-          receiver: "",
-          status: MessageStatus.none,
-          timeSent: DateTime.now(),
-          imageUri: "",
         );
       case MessageType.none:
         return null;
@@ -194,87 +182,4 @@ class TextMessage extends Message {
 
   @override
   String toString() => 'TextMessage(text: $text, timeSent: $timeSent)';
-}
-
-class ImageMessage extends Message {
-  final String? text;
-  final String imageUri;
-
-  ImageMessage({
-    this.text,
-    required this.imageUri,
-    required super.id,
-    required super.sender,
-    required super.receiver,
-    required super.status,
-    required super.timeSent,
-  }) : super(type: MessageType.image);
-
-  @override
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'text': text,
-      'imageUri': imageUri,
-      'id': id,
-      'sender': sender,
-      'receiver': receiver,
-      'status': MessageStatusExtension.toStringValue(status),
-      'timeSent': timeSent,
-      'type': MessageTypeExtension.toStringValue(type),
-    };
-  }
-
-  static ImageMessage fromMap(Map<String, dynamic> map) {
-    return ImageMessage(
-      text: map['text'],
-      imageUri: map['imageUri'],
-      id: map['id'],
-      sender: map['sender'],
-      receiver: map['receiver'],
-      status: MessageStatusExtension.toTypeValue(map['status']),
-      timeSent: map['timeSent'].toDate(),
-    );
-  }
-
-  @override
-  ImageMessage copyWith({
-    String? text,
-    String? imageUri,
-    String? id,
-    String? sender,
-    String? receiver,
-    MessageType? type,
-    MessageStatus? status,
-    DateTime? timeSent,
-  }) {
-    return ImageMessage(
-      text: text ?? this.text,
-      imageUri: imageUri ?? this.imageUri,
-      id: id ?? this.id,
-      sender: sender ?? this.sender,
-      receiver: receiver ?? this.receiver,
-      status: status ?? this.status,
-      timeSent: timeSent ?? this.timeSent,
-    );
-  }
-
-  static ImageMessage empty() {
-    return ImageMessage(
-      text: null,
-      id: "",
-      sender: "",
-      receiver: "",
-      status: MessageStatus.none,
-      timeSent: DateTime.now(),
-      imageUri: "",
-    );
-  }
-
-  bool isNotEmpty() {
-    return imageUri.isNotEmpty && sender.isNotEmpty && receiver.isNotEmpty;
-  }
-
-  @override
-  String toString() =>
-      'ImageMessage(text: $text, imageUri: $imageUri, timeSent: $timeSent)';
 }

@@ -35,7 +35,7 @@ class MessageService {
       final updatedMessage = message.copyWith(
         sender: _currentUser,
         id: docRef.id,
-        status: message.receiver == message.sender
+        status: message.receiver == _currentUser
             ? MessageStatus.seen
             : MessageStatus.none,
       );
@@ -132,5 +132,35 @@ class MessageService {
         : b.timeSent.compareTo(a.timeSent));
 
     return messages;
+  }
+
+  void onMessageDelivered({
+    required String userId,
+    required String chatId,
+    required String messageId,
+  }) {
+    _messages(
+      userId: userId,
+      chatId: chatId,
+    ).doc(messageId).update(
+      {
+        'status': MessageStatusExtension.toStringValue(MessageStatus.delivered),
+      },
+    );
+  }
+
+  void onMessageSeen({
+    required String userId,
+    required String chatId,
+    required String messageId,
+  }) {
+    _messages(
+      userId: userId,
+      chatId: chatId,
+    ).doc(messageId).update(
+      {
+        'status': MessageStatusExtension.toStringValue(MessageStatus.seen),
+      },
+    );
   }
 }

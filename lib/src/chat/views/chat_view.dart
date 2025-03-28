@@ -14,61 +14,43 @@ class ChatView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<Message> sortedMessages = MessageService.sortItemsByDate(chat.messages);
+    final List<Message> sortedMessages =
+        MessageService.sortItemsByDate(chat.messages);
 
-    final Message? message = sortedMessages.isNotEmpty ? sortedMessages.last : null;
+    final Message? message =
+        sortedMessages.isNotEmpty ? sortedMessages.last : null;
 
     String? text;
 
     if (message is TextMessage) {
       text = message.text;
-    } else if (message is ImageMessage) {
-      text = message.text ?? "Sent a photo";
     }
 
-    Icon? icon;
+    final AsyncValue<ContactModel> userInfoAsync =
+        ref.watch(userInfoProvider(chat.chatId));
 
-    if (message is ImageMessage) {
-      icon = Icon(
-        Icons.image_rounded,
-        size: 16.0,
-      );
-    }
-
-    final AsyncValue<ContactModel> userInfoAsync = ref.watch(userInfoProvider(chat.chatId));
-
-    return userInfoAsync.when(
-      data: (contact) => ListTile(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) {
-              return ChatDetailScreen(chatId: contact.id ?? "");
-            },
-          ),
-        ),
-        leading: CircleAvatar(
-          backgroundImage:
-              contact.photo != null ? NetworkImage(contact.photo!) : null,
-          child: contact.photo == null ? const Icon(Icons.person) : null,
-        ),
-        title: Text(contact.name),
-        subtitle: Row(
-          children: [
-            if (icon != null)
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: icon,
+    return sortedMessages.isEmpty
+        ? SizedBox.shrink()
+        : userInfoAsync.when(
+            data: (contact) => ListTile(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return ChatDetailScreen(chatId: contact.id ?? "");
+                  },
+                ),
               ),
-            if (text != null)
-              Text(
-                text,
+              leading: CircleAvatar(
+                backgroundImage:
+                    contact.photo != null ? NetworkImage(contact.photo!) : null,
+                child: contact.photo == null ? const Icon(Icons.person) : null,
               ),
-          ],
-        ),
-      ),
-      loading: () => SizedBox.shrink(),
-      error: (error, stack) => SizedBox.shrink(),
-    );
+              title: Text(contact.name),
+              subtitle: text == null ? null : Text(text),
+            ),
+            loading: () => SizedBox.shrink(),
+            error: (error, stack) => SizedBox.shrink(),
+          );
   }
 }

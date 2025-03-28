@@ -6,7 +6,7 @@ logger = logging.getLogger()
 
 from src.contact.models.contact_model import ContactModel
 from src.contact.services.get_registered_contacts import get_registered_contacts
-from src.core.service.create_response import create_response
+from src.core.services.create_response import create_response
 
 
 @https_fn.on_request()

@@ -17,49 +17,15 @@ class ContactsNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
   Future<void> _load() async {
     try {
-      final permissionResult = await _contactService.requestContactPermission();
-      permissionResult.fold(
+      final result = await _contactService.loadContacts();
+      result.fold(
         (error) {
-          _logger.e('Contact permission error: $error');
+          _logger.e('Error loading contacts: $error');
           state = AsyncValue.error(error, StackTrace.current);
         },
-        (success) async {
-          _logger.i('Contact permission granted.');
-          final localResult = await _contactService.fetchLocalContacts();
-
-          localResult.fold(
-            (error) {
-              _logger.e('Error fetching local contacts: $error');
-              state = AsyncValue.error(error, StackTrace.current);
-            },
-            (contactsRaw) async {
-              final contacts = contactsRaw
-                  .map((contact) => ContactModel.fromContact(contact))
-                  .toList();
-
-              _logger.i('Fetched ${contacts.length} local contacts.');
-              
-              if (contacts.isEmpty) {
-                state = AsyncValue.data([]);
-                _logger.i('No local contacts found.');
-              } else {
-                final registeredResult =
-                    await _contactService.getRegisteredContacts(contacts);
-
-                registeredResult.fold(
-                  (error) {
-                    _logger.e('Error fetching registered contacts: $error');
-                    state = AsyncValue.error(error, StackTrace.current);
-                  },
-                  (registeredContacts) {
-                    state = AsyncValue.data(registeredContacts);
-                    _logger.i(
-                        'Loaded ${registeredContacts.length} registered contacts.');
-                  },
-                );
-              }
-            },
-          );
+        (contacts) {
+          state = AsyncValue.data(contacts);
+          _logger.i('Loaded ${contacts.length} registered contacts.');
         },
       );
     } catch (e, stackTrace) {
