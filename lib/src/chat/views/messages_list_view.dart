@@ -56,7 +56,7 @@ class MessagesListView extends StatelessWidget {
                   : 16.0;
 
           return Padding(
-            padding: EdgeInsets.only(top: topPadding),
+            padding: EdgeInsets.only(top: topPadding, left: 8, right: 8),
             child: MessageView(
               chatId: chatId,
               key: Key(element.id),

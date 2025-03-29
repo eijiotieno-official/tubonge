@@ -12,7 +12,7 @@ class ChatNotificationService {
 
   /// Requests permission to send notifications if not already allowed.
   static Future<void> init() async {
-    final isAllowed = await _awesomeNotifications.isNotificationAllowed();
+    final bool isAllowed = await _awesomeNotifications.isNotificationAllowed();
     if (!isAllowed) {
       await _awesomeNotifications.requestPermissionToSendNotifications();
     }

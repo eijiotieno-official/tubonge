@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/user_info_provider.dart';
+import '../../../core/views/avatar_view.dart';
 import '../../contact/models/contact_model.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
@@ -17,8 +18,7 @@ class ChatView extends ConsumerWidget {
     final List<Message> sortedMessages =
         MessageService.sortItemsByDate(chat.messages);
 
-    final Message? message =
-        sortedMessages.isNotEmpty ? sortedMessages.last : null;
+    final Message? message = lastMessage(sortedMessages);
 
     String? text;
 
@@ -32,25 +32,30 @@ class ChatView extends ConsumerWidget {
     return sortedMessages.isEmpty
         ? SizedBox.shrink()
         : userInfoAsync.when(
-            data: (contact) => ListTile(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return ChatDetailScreen(chatId: contact.id ?? "");
-                  },
+            data: (contact) {
+              String? photo = contact.photo;
+              String name = contact.name;
+              Text? subtitle = text == null ? null : Text(text);
+              return ListTile(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      final String chatId = contact.id ?? "";
+                      return ChatDetailScreen(chatId: chatId);
+                    },
+                  ),
                 ),
-              ),
-              leading: CircleAvatar(
-                backgroundImage:
-                    contact.photo != null ? NetworkImage(contact.photo!) : null,
-                child: contact.photo == null ? const Icon(Icons.person) : null,
-              ),
-              title: Text(contact.name),
-              subtitle: text == null ? null : Text(text),
-            ),
+                leading: AvatarView(imageUrl: photo),
+                title: Text(name),
+                subtitle: subtitle,
+              );
+            },
             loading: () => SizedBox.shrink(),
             error: (error, stack) => SizedBox.shrink(),
           );
   }
+
+  Message? lastMessage(List<Message> sortedMessages) =>
+      sortedMessages.isNotEmpty ? sortedMessages.last : null;
 }

@@ -12,11 +12,12 @@ class AvatarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String url = imageUrl ?? "";
+
     return CircleAvatar(
       radius: radius,
-      backgroundImage:
-          imageUrl == null ? null : CachedNetworkImageProvider(imageUrl ?? ""),
-      child: imageUrl == null ? Icon(Icons.person_2_rounded) : null,
+      backgroundImage: url.isEmpty ? null : CachedNetworkImageProvider(url),
+      child: url.isEmpty ? Icon(Icons.person_2_rounded) : null,
     );
   }
 }

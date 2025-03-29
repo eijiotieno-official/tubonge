@@ -1,12 +1,13 @@
+import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart'; // Import the logger package
+import 'package:logger/logger.dart';
 
 import '../../../core/models/phone_model.dart';
 import '../services/auth_service.dart';
 import 'timer_provider.dart';
 
-final _logger = Logger(); // Global logger instance
+final Logger _logger = Logger();
 
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
@@ -32,7 +33,8 @@ class PhoneVerificationNotifier extends StateNotifier<AsyncValue<bool>> {
       _logger.i("Phone verification process started.");
       state = const AsyncValue.loading();
 
-      final phone = ref.read(phoneNumberProvider);
+      final PhoneModel? phone = ref.read(phoneNumberProvider);
+
       _logger.i("Phone number read: $phone");
 
       await authService.verifyPhoneNumber(
@@ -64,7 +66,7 @@ class PhoneVerificationNotifier extends StateNotifier<AsyncValue<bool>> {
 
 final phoneVerificationProvider = StateNotifierProvider.autoDispose<
     PhoneVerificationNotifier, AsyncValue<bool>>((ref) {
-  final authService = ref.read(authServiceProvider);
+  final AuthService authService = ref.read(authServiceProvider);
   return PhoneVerificationNotifier(
     ref: ref,
     authService: authService,
@@ -87,13 +89,15 @@ class CodeVerificationNotifier
     _logger.i("Code verification process started.");
     state = const AsyncValue.loading();
 
-    final verificationId = ref.read(verificationIdProvider);
-    final smsCode = ref.read(otpCodeProvider);
+    final String? verificationId = ref.read(verificationIdProvider);
+
+    final String? smsCode = ref.read(otpCodeProvider);
+
     _logger.i("Using verificationId: $verificationId, smsCode: $smsCode");
 
-    final phone = ref.read(phoneNumberProvider);
+    final PhoneModel? phone = ref.read(phoneNumberProvider);
 
-    final result = await authService.verifyCode(
+    final Either<String, UserCredential> result = await authService.verifyCode(
       phone: phone ?? PhoneModel.empty(),
       verificationId: verificationId,
       smsCode: smsCode,
@@ -115,10 +119,10 @@ class CodeVerificationNotifier
   }
 }
 
-
 final codeVerificationProvider = StateNotifierProvider.autoDispose<
     CodeVerificationNotifier, AsyncValue<UserCredential?>>((ref) {
-  final authService = ref.read(authServiceProvider);
+  final AuthService authService = ref.read(authServiceProvider);
+
   return CodeVerificationNotifier(
     ref: ref,
     authService: authService,
@@ -139,8 +143,10 @@ class ResendCodeNotifier extends StateNotifier<AsyncValue<bool>> {
       _logger.i("Resend code process started.");
       state = const AsyncValue.loading();
 
-      final phone = ref.read(phoneNumberProvider);
-      final resendToken = ref.read(resendTokenProvider);
+      final PhoneModel? phone = ref.read(phoneNumberProvider);
+
+      final int? resendToken = ref.read(resendTokenProvider);
+
       _logger.i("Resend code - phone: $phone, resendToken: $resendToken");
 
       await authService.resendCode(
@@ -174,7 +180,8 @@ class ResendCodeNotifier extends StateNotifier<AsyncValue<bool>> {
 final resendCodeProvider =
     StateNotifierProvider.autoDispose<ResendCodeNotifier, AsyncValue<bool>>(
         (ref) {
-  final authService = ref.read(authServiceProvider);
+  final AuthService authService = ref.read(authServiceProvider);
+
   return ResendCodeNotifier(
     ref: ref,
     authService: authService,
@@ -195,13 +202,16 @@ class ChangePhoneNumberNotifier extends StateNotifier<AsyncValue<bool>> {
     _logger.i("Change phone number process started.");
     state = const AsyncValue.loading();
 
-    final phone = ref.read(phoneNumberProvider);
-    final verificationId = ref.read(verificationIdProvider);
-    final smsCode = ref.read(otpCodeProvider);
+    final PhoneModel? phone = ref.read(phoneNumberProvider);
+
+    final String? verificationId = ref.read(verificationIdProvider);
+
+    final String? smsCode = ref.read(otpCodeProvider);
+
     _logger.i(
         "Change phone number - phone: $phone, verificationId: $verificationId, smsCode: $smsCode");
 
-    final result = await authService.changePhoneNumber(
+    final Either<String, bool> result = await authService.changePhoneNumber(
       newPhone: phone,
       verificationId: verificationId,
       smsCode: smsCode,
@@ -221,7 +231,8 @@ class ChangePhoneNumberNotifier extends StateNotifier<AsyncValue<bool>> {
 
 final changePhoneNumberProvider =
     StateNotifierProvider<ChangePhoneNumberNotifier, AsyncValue<bool>>((ref) {
-  final authService = ref.read(authServiceProvider);
+  final AuthService authService = ref.read(authServiceProvider);
+
   return ChangePhoneNumberNotifier(
     ref: ref,
     authService: authService,
@@ -238,9 +249,10 @@ class DeleteAccountNotifier extends StateNotifier<AsyncValue<bool>> {
 
   Future<void> call() async {
     _logger.i("Delete account process started.");
+
     state = const AsyncValue.loading();
 
-    final result = await authService.deleteAccount();
+    final Either<String, bool> result = await authService.deleteAccount();
 
     result.fold(
       (error) => _logger.e("Delete account failed: $error"),
@@ -256,7 +268,8 @@ class DeleteAccountNotifier extends StateNotifier<AsyncValue<bool>> {
 
 final deleteAccountProvider =
     StateNotifierProvider<DeleteAccountNotifier, AsyncValue<bool>>((ref) {
-  final authService = ref.read(authServiceProvider);
+  final AuthService authService = ref.read(authServiceProvider);
+
   return DeleteAccountNotifier(
     authService: authService,
   );
@@ -274,7 +287,7 @@ class SignOutNotifier extends StateNotifier<AsyncValue<bool>> {
     _logger.i("Sign out process started.");
     state = const AsyncValue.loading();
 
-    final result = await authService.signOut();
+    final Either<String, bool> result = await authService.signOut();
 
     result.fold(
       (error) => _logger.e("Sign out failed: $error"),
@@ -290,7 +303,7 @@ class SignOutNotifier extends StateNotifier<AsyncValue<bool>> {
 
 final signOutProvider =
     StateNotifierProvider<SignOutNotifier, AsyncValue<bool>>((ref) {
-  final authService = ref.read(authServiceProvider);
+  final AuthService authService = ref.read(authServiceProvider);
   return SignOutNotifier(
     authService: authService,
   );

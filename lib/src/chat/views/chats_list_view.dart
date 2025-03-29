@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tubonge/core/views/async_view.dart';
 
+import '../../../core/views/async_view.dart';
 import '../models/chat_model.dart';
 import '../providers/chats_provider.dart';
 import 'chat_view.dart';
@@ -19,7 +19,7 @@ class ChatsListView extends ConsumerWidget {
         return ListView.builder(
           itemCount: chats.length,
           itemBuilder: (context, index) {
-            final chat = chats[index];
+            final Chat chat = chats[index];
 
             return ChatView(chat: chat);
           },

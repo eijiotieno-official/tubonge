@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
 
@@ -17,7 +18,9 @@ class ContactsNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
   Future<void> _load() async {
     try {
-      final result = await _contactService.loadContacts();
+      final Either<String, List<ContactModel>> result =
+          await _contactService.loadContacts();
+
       result.fold(
         (error) {
           _logger.e('Error loading contacts: $error');
@@ -41,9 +44,11 @@ class ContactsNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
   }
 
   ContactModel? getContactInfo(String? userId) {
-    final contacts = state.value ?? [];
-    final contact =
+    final List<ContactModel> contacts = state.value ?? [];
+
+    final ContactModel? contact =
         contacts.firstWhereOrNull((contact) => contact.id == userId);
+
     if (contact == null) {
       _logger.w('Contact with userId $userId not found.');
     } else {
@@ -56,6 +61,7 @@ class ContactsNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
 final contactsProvider =
     StateNotifierProvider<ContactsNotifier, AsyncValue<List<ContactModel>>>(
         (ref) {
-  final contactService = ref.watch(contactServiceProvider);
+  final ContactService contactService = ref.watch(contactServiceProvider);
+  
   return ContactsNotifier(contactService);
 });

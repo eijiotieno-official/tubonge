@@ -27,12 +27,12 @@ class MessageService {
         return Left("User not log in");
       }
 
-      final docRef = _messages(
+      final DocumentReference<Object?> docRef = _messages(
         userId: _currentUser,
         chatId: message.receiver,
       ).doc();
 
-      final updatedMessage = message.copyWith(
+      final Message updatedMessage = message.copyWith(
         sender: _currentUser,
         id: docRef.id,
         status: message.receiver == _currentUser
@@ -89,10 +89,13 @@ class MessageService {
         List<Message> messages = initialMessages;
 
         for (DocumentChange<Object?> change in querySnapshot.docChanges) {
-          final subDocData = change.doc.data() as Map<String, dynamic>;
+          final Map<String, dynamic> subDocData =
+              change.doc.data() as Map<String, dynamic>;
+              
           switch (change.type) {
             case DocumentChangeType.added:
-              final message = Message.fromMap(subDocData);
+              final Message message = Message.fromMap(subDocData);
+
               if (!messages.any((element) => element.id == message.id)) {
                 messages.add(message);
               }

@@ -28,13 +28,12 @@ class PhoneInputView extends ConsumerWidget {
           SizedBox(height: 8.0),
           InternationalPhoneNumberInput(
             isEnabled: isLoading == false,
-            onInputChanged: (phoneNumber) {
-              ref.read(phoneNumberProvider.notifier).state = PhoneModel(
-                isoCode: phoneNumber.isoCode ?? "",
-                dialCode: phoneNumber.dialCode ?? "",
-                phoneNumber: phoneNumber.phoneNumber ?? "",
-              );
-            },
+            onInputChanged: (phoneNumber) =>
+                ref.read(phoneNumberProvider.notifier).state = PhoneModel(
+              isoCode: phoneNumber.isoCode ?? "",
+              dialCode: phoneNumber.dialCode ?? "",
+              phoneNumber: phoneNumber.phoneNumber ?? "",
+            ),
             autoFocus: true,
             autoFocusSearch: true,
             formatInput: true,

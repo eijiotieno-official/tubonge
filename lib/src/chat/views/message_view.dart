@@ -33,10 +33,12 @@ class _MessageViewState extends ConsumerState<MessageView> {
   }
 
   void _updateStatus() {
-    final message = widget.message;
+    final Message message = widget.message;
 
-    if (message.status != MessageStatus.seen &&
-        message.sender != FirebaseAuth.instance.currentUser?.uid) {
+    final bool shouldUpdate = message.status != MessageStatus.seen &&
+        message.sender != FirebaseAuth.instance.currentUser?.uid;
+
+    if (shouldUpdate) {
       ref.read(messageServiceProvider).onMessageSeen(
           userId: message.sender,
           chatId: message.receiver,
@@ -46,7 +48,7 @@ class _MessageViewState extends ConsumerState<MessageView> {
 
   @override
   Widget build(BuildContext context) {
-    final message = widget.message;
+    final Message message = widget.message;
 
     final bool fromCurrentUser =
         message.sender == FirebaseAuth.instance.currentUser?.uid;

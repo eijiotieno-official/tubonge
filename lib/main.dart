@@ -85,6 +85,8 @@ Future<void> main() async {
     await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
   }
 
+  await ChatNotificationService.init();
+
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(const ProviderScope(child: MainApp()));

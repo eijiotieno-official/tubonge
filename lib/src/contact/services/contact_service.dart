@@ -13,8 +13,8 @@ class ContactService {
   Future<Either<String, List<flutter_contacts.Contact>>>
       fetchLocalContacts() async {
     try {
-      // Check if permission is granted
-      final permissionResult = await isPermissionGranted();
+      final Either<String, bool> permissionResult = await isPermissionGranted();
+
       if (permissionResult.isLeft()) {
         return Left(
             permissionResult.swap().getOrElse(() => 'Permission denied'));
@@ -36,7 +36,6 @@ class ContactService {
         return contact;
       }).toList();
 
-      // Remove duplicate contacts
       final List<flutter_contacts.Contact> uniqueContacts =
           <flutter_contacts.Contact>[];
       final Set<String> contactSet = <String>{};
@@ -115,15 +114,19 @@ class ContactService {
 
   Future<Either<String, List<ContactModel>>> loadContacts() async {
     try {
-      final permissionResult = await requestContactPermission();
+      final Either<String, bool> permissionResult =
+          await requestContactPermission();
+
       return await permissionResult.fold(
         (error) async => Left(error),
         (success) async {
-          final localResult = await fetchLocalContacts();
+          final Either<String, List<flutter_contacts.Contact>> localResult =
+              await fetchLocalContacts();
+
           return await localResult.fold(
             (error) async => Left(error),
             (contactsRaw) async {
-              final contacts = contactsRaw
+              final List<ContactModel> contacts = contactsRaw
                   .map((contact) => ContactModel.fromContact(contact))
                   .toList();
 

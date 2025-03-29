@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/views/error_message_view.dart';
@@ -20,7 +19,7 @@ class CodeInputView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final timerCount = ref.watch(timerProvider);
+    final int timerCount = ref.watch(timerProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -28,23 +27,19 @@ class CodeInputView extends ConsumerWidget {
         spacing: 16.0,
         children: [
           const SizedBox(height: 8.0),
-          OtpTextField(
-            autoFocus: true,
+          TextField(
+            autofocus: true,
             enabled: !isLoading,
-            numberOfFields: 6,
-            focusedBorderColor: Theme.of(context).colorScheme.primary,
-            borderRadius: BorderRadius.circular(8.0),
-            showFieldAsBox: false,
-            onSubmit: (String code) {
-              ref.read(otpCodeProvider.notifier).state = code;
-              debugPrint(code);
-            },
+            decoration: InputDecoration(
+              hintText: "Code",
+            ),
+            onChanged: (value) =>
+                ref.read(otpCodeProvider.notifier).state = value,
           ),
           TextButton(
             onPressed: timerCount == 0
-                ? () async {
-                    await ref.read(resendCodeProvider.notifier).resendCode();
-                  }
+                ? () async =>
+                    await ref.read(resendCodeProvider.notifier).resendCode()
                 : null,
             child: timerCount == 0
                 ? const Text("Resend Code")
