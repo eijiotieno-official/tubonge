@@ -5,7 +5,7 @@ import 'package:logger/logger.dart';
 
 import '../models/contact_model.dart';
 import '../services/contact_service.dart';
-import 'contact_service_provider.dart';
+import '../providers/contact_service_provider.dart';
 
 class ContactsNotifier extends StateNotifier<AsyncValue<List<ContactModel>>> {
   final ContactService _contactService;

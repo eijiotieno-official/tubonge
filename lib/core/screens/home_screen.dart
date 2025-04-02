@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../src/auth/controller/sign_out_controller.dart';
-import '../../../src/chat/services/message_service.dart';
 import '../../../src/chat/views/chats_list_view.dart';
-import '../../../src/contact/providers/contacts_provider.dart';
 import '../../../src/contact/screens/contacts_screen.dart';
+import '../../src/chat/providers/message_service_provider.dart';
+import '../../src/contact/controllers/contacts_controller.dart';
 import '../services/router_service.dart';
 import '../views/avatar_view.dart';
 
@@ -52,12 +52,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
         String title = contact == null ? senderPhone : contact.name;
 
-        // Update message status to 'delivered'
-        MessageService().onMessageDelivered(
-          userId: senderId,
-          chatId: FirebaseAuth.instance.currentUser!.uid,
-          messageId: messageId,
-        );
+        ref.read(messageServiceProvider).onMessageDelivered(
+              userId: senderId,
+              chatId: FirebaseAuth.instance.currentUser!.uid,
+              messageId: messageId,
+            );
 
         // Show a snack bar with message details
         if (mounted) {

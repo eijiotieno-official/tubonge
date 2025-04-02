@@ -10,7 +10,6 @@ class ChatNotificationService {
 
   static ReceivedAction? initialAction;
 
-  /// Requests permission to send notifications if not already allowed.
   static Future<void> init() async {
     final bool isAllowed = await _awesomeNotifications.isNotificationAllowed();
     if (!isAllowed) {
@@ -19,7 +18,6 @@ class ChatNotificationService {
     await _initialize();
   }
 
-  /// Initializes notification channels and sets up listeners.
   static Future<void> _initialize() async {
     await _awesomeNotifications.initialize(
       null,

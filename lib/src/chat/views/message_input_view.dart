@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../providers/chat_service_provider.dart';
-import '../providers/chats_provider.dart';
+import '../controllers/chats_controller.dart';
 import '../providers/send_message_provider.dart';
 
 class MessageInputView extends ConsumerStatefulWidget {

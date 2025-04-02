@@ -5,7 +5,10 @@ import '../../../core/services/firestore_error_service.dart';
 import '../models/chat_model.dart';
 
 class ChatService {
-  final FirestoreErrorService _firestoreErrorService = FirestoreErrorService();
+  final FirestoreErrorService _firestoreErrorService;
+  ChatService({
+    required FirestoreErrorService firestoreErrorService,
+  }) : _firestoreErrorService = firestoreErrorService;
 
   CollectionReference _chats(String userId) => FirebaseFirestore.instance
       .collection("users")

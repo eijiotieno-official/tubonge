@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/views/async_view.dart';
 import '../models/chat_model.dart';
-import '../providers/chats_provider.dart';
+import '../controllers/chats_controller.dart';
 import 'chat_view.dart';
 
 class ChatsListView extends ConsumerWidget {

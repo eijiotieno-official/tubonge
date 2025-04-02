@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/views/async_view.dart';
 import '../../chat/screens/chat_detail_screen.dart';
 import '../models/contact_model.dart';
-import '../providers/contacts_provider.dart';
+import '../controllers/contacts_controller.dart';
 import '../views/contacts_list_view.dart';
 
 class ContactsScreen extends ConsumerStatefulWidget {

@@ -7,8 +7,8 @@ import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import '../services/chat_service.dart';
 import '../services/message_service.dart';
-import 'chat_service_provider.dart';
-import 'message_service_provider.dart';
+import '../providers/chat_service_provider.dart';
+import '../providers/message_service_provider.dart';
 
 final Logger _logger = Logger();
 

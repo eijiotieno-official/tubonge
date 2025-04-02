@@ -9,7 +9,7 @@ import '../../../core/views/avatar_view.dart';
 import '../../contact/models/contact_model.dart';
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
-import '../providers/chats_provider.dart';
+import '../controllers/chats_controller.dart';
 import '../services/message_service.dart';
 import '../views/message_input_view.dart';
 import '../views/messages_list_view.dart';

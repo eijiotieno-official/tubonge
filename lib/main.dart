@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/services/cloud_functions_error_service.dart';
+import 'core/services/firestore_error_service.dart';
 import 'core/services/router_service.dart';
 import 'firebase_options.dart';
 import 'src/chat/services/chat_notification_service.dart';
@@ -20,7 +21,7 @@ import 'src/contact/models/contact_model.dart';
 import 'src/contact/services/contact_service.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  MessageService messageService = MessageService();
+  MessageService messageService = MessageService(firestoreErrorService: FirestoreErrorService());
   ContactService contactService = ContactService(cloudFunctionsErrorService: CloudFunctionsErrorService());
 
   final Either<String, List<ContactModel>> contactsEither =

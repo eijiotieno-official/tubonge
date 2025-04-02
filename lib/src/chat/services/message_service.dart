@@ -6,7 +6,10 @@ import '../../../core/services/firestore_error_service.dart';
 import '../models/message_model.dart';
 
 class MessageService {
-  final FirestoreErrorService _firestoreErrorService = FirestoreErrorService();
+  final FirestoreErrorService _firestoreErrorService;
+  MessageService({
+    required FirestoreErrorService firestoreErrorService,
+  }) : _firestoreErrorService = firestoreErrorService;
 
   final String? _currentUser = FirebaseAuth.instance.currentUser?.uid;
 
@@ -91,7 +94,7 @@ class MessageService {
         for (DocumentChange<Object?> change in querySnapshot.docChanges) {
           final Map<String, dynamic> subDocData =
               change.doc.data() as Map<String, dynamic>;
-              
+
           switch (change.type) {
             case DocumentChangeType.added:
               final Message message = Message.fromMap(subDocData);
