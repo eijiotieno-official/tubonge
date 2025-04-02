@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/auth_service_provider.dart';
+import '../controller/code_verification_controller.dart';
+import '../controller/phone_verification_controller.dart';
+import '../providers/otp_code_provider.dart';
+import '../providers/phone_number_provider.dart';
+import '../providers/verification_id_provider.dart';
 import '../views/code_input_view.dart';
 import '../views/phone_input_view.dart';
 

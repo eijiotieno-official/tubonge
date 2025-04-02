@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/views/error_message_view.dart';
 import '../../../core/views/tubonge_filled_button.dart';
-import '../providers/auth_service_provider.dart';
+import '../controller/resend_code_controller.dart';
+import '../providers/otp_code_provider.dart';
 import '../providers/timer_provider.dart';
 
 class CodeInputView extends ConsumerWidget {
@@ -53,7 +54,7 @@ class CodeInputView extends ConsumerWidget {
             onTap: onTap,
             text: "Confirm",
           ),
-          const SizedBox(height: 8.0),
+          const SizedBox(height: 2.0),
         ],
       ),
     );

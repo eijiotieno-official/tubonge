@@ -7,9 +7,17 @@ import '../../../core/models/phone_model.dart';
 import 'auth_error_service.dart';
 
 class AuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final UserService _userService = UserService();
-  final AuthErrorService _authErrorService = AuthErrorService();
+  final FirebaseAuth _auth;
+  final UserService _userService;
+  final AuthErrorService _authErrorService;
+
+  AuthService({
+    required FirebaseAuth auth,
+    required UserService userService,
+    required AuthErrorService authErrorService,
+  })  : _auth = auth,
+        _userService = userService,
+        _authErrorService = authErrorService;
 
   Future<Either<String, bool>> verifyPhoneNumber({
     required PhoneModel? phone,

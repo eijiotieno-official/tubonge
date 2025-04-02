@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
+import '../../../core/models/phone_model.dart';
 import '../../../core/views/error_message_view.dart';
 import '../../../core/views/tubonge_filled_button.dart';
-import '../../../core/models/phone_model.dart';
-import '../providers/auth_service_provider.dart';
+import '../providers/phone_number_provider.dart';
 
 class PhoneInputView extends ConsumerWidget {
   final bool isLoading;
@@ -64,7 +64,7 @@ class PhoneInputView extends ConsumerWidget {
             onTap: onTap,
             text: "Next",
           ),
-          SizedBox(height: 8.0),
+          SizedBox(height: 2.0),
         ],
       ),
     );
