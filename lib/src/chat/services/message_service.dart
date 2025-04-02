@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/services/firestore_error_service.dart';
 import '../models/message_model.dart';
+import '../utils/chat_utils.dart';
 
 class MessageService {
   final FirestoreErrorService _firestoreErrorService;
@@ -13,24 +14,13 @@ class MessageService {
 
   final String? _currentUser = FirebaseAuth.instance.currentUser?.uid;
 
-  CollectionReference _chats(String userId) => FirebaseFirestore.instance
-      .collection("users")
-      .doc(userId)
-      .collection("chats");
-
-  CollectionReference _messages({
-    required String userId,
-    required String chatId,
-  }) =>
-      _chats(userId).doc(chatId).collection("messages");
-
   Either<String, Message> createMessage(Message message) {
     try {
       if (_currentUser == null) {
         return Left("User not log in");
       }
 
-      final DocumentReference<Object?> docRef = _messages(
+      final DocumentReference<Object?> docRef = ChatUtils.messages(
         userId: _currentUser,
         chatId: message.receiver,
       ).doc();
@@ -54,7 +44,7 @@ class MessageService {
 
   Either<String, bool> deleteMessage(Message message) {
     try {
-      _messages(
+      ChatUtils.messages(
         userId: message.sender,
         chatId: message.receiver,
       ).doc(message.id).delete();
@@ -68,7 +58,7 @@ class MessageService {
 
   Either<String, bool> updateMessage(Message message) {
     try {
-      _messages(
+      ChatUtils.messages(
         userId: message.sender,
         chatId: message.receiver,
       ).doc(message.id).update(message.toMap());
@@ -80,12 +70,12 @@ class MessageService {
     }
   }
 
-  Stream<Either<String, List<Message>>> subscribeToMessages({
+  Stream<Either<String, List<Message>>> streamMessages({
     required String userId,
     required String chatId,
     required List<Message> initialMessages,
   }) {
-    return _messages(userId: userId, chatId: chatId)
+    return ChatUtils.messages(userId: userId, chatId: chatId)
         .snapshots()
         .asyncMap<Either<String, List<Message>>>(
       (QuerySnapshot querySnapshot) {
@@ -145,7 +135,7 @@ class MessageService {
     required String chatId,
     required String messageId,
   }) {
-    _messages(
+    ChatUtils.messages(
       userId: userId,
       chatId: chatId,
     ).doc(messageId).update(
@@ -160,7 +150,7 @@ class MessageService {
     required String chatId,
     required String messageId,
   }) {
-    _messages(
+    ChatUtils.messages(
       userId: userId,
       chatId: chatId,
     ).doc(messageId).update(

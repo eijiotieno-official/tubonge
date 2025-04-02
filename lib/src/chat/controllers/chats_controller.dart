@@ -28,9 +28,9 @@ class ChatsNotifier extends StateNotifier<AsyncValue<List<Chat>>> {
       state = AsyncValue.data(<Chat>[]);
     } else {
       _logger.i("Fetching chats for user: $_userId");
-      
+
       final Stream<Either<String, List<Chat>>> chatsStreamResult =
-          _chatService.subscribeToChats(_userId);
+          _chatService.streamChats(_userId);
 
       chatsStreamResult.listen(
         (chatsEither) => chatsEither.fold(
@@ -53,13 +53,12 @@ class ChatsNotifier extends StateNotifier<AsyncValue<List<Chat>>> {
 
                 if (chatIndex > -1) {
                   _logger.i("Subscribing to messages for chat: ${chat.chatId}");
-                  
+
                   List<Message> initialMessages =
                       currentChats[chatIndex].messages;
 
                   final Stream<Either<String, List<Message>>>
-                      messagesStreamResult =
-                      _messageService.subscribeToMessages(
+                      messagesStreamResult = _messageService.streamMessages(
                           chatId: chat.chatId,
                           initialMessages: initialMessages,
                           userId: _userId);

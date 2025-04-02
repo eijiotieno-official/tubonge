@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../core/services/firestore_error_service.dart';
 import '../models/chat_model.dart';
+import '../utils/chat_utils.dart';
 
 class ChatService {
   final FirestoreErrorService _firestoreErrorService;
@@ -10,15 +11,10 @@ class ChatService {
     required FirestoreErrorService firestoreErrorService,
   }) : _firestoreErrorService = firestoreErrorService;
 
-  CollectionReference _chats(String userId) => FirebaseFirestore.instance
-      .collection("users")
-      .doc(userId)
-      .collection("chats");
-
   Either<String, bool> createChat(
       {required String userId, required String chatId}) {
     try {
-      _chats(userId).doc(chatId).set({
+      ChatUtils.chats(userId).doc(chatId).set({
         "chatId": chatId,
       }, SetOptions(merge: true));
 
@@ -29,8 +25,10 @@ class ChatService {
     }
   }
 
-  Stream<Either<String, List<Chat>>> subscribeToChats(String userId) {
-    return _chats(userId).snapshots().asyncMap<Either<String, List<Chat>>>(
+  Stream<Either<String, List<Chat>>> streamChats(String userId) {
+    return ChatUtils.chats(userId)
+        .snapshots()
+        .asyncMap<Either<String, List<Chat>>>(
       (querySnapshot) async {
         final chats = querySnapshot.docs.map((doc) {
           return Chat.fromMap(doc.data() as Map<String, dynamic>);
