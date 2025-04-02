@@ -5,11 +5,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../src/auth/controller/sign_out_controller.dart';
-import '../../src/chat/services/message_service.dart';
-import '../../src/chat/views/chats_list_view.dart';
-import '../../src/contact/providers/contacts_provider.dart';
-import '../../src/contact/screens/contacts_screen.dart';
+import '../../../src/auth/controller/sign_out_controller.dart';
+import '../../../src/chat/services/message_service.dart';
+import '../../../src/chat/views/chats_list_view.dart';
+import '../../../src/contact/providers/contacts_provider.dart';
+import '../../../src/contact/screens/contacts_screen.dart';
 import '../services/router_service.dart';
 import '../views/avatar_view.dart';
 

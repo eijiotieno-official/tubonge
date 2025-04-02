@@ -7,8 +7,10 @@ import '../../../core/services/cloud_functions_error_service.dart';
 import '../models/contact_model.dart';
 
 class ContactService {
-  final CloudFunctionsErrorService _cloudFunctionsErrorService =
-      CloudFunctionsErrorService();
+  final CloudFunctionsErrorService _cloudFunctionsErrorService;
+  ContactService({
+    required CloudFunctionsErrorService cloudFunctionsErrorService,
+  }) : _cloudFunctionsErrorService = cloudFunctionsErrorService;
 
   Future<Either<String, List<flutter_contacts.Contact>>>
       fetchLocalContacts() async {
@@ -54,7 +56,6 @@ class ContactService {
     }
   }
 
-  // Method to check if the contacts permission is granted using permission_handler
   Future<Either<String, bool>> isPermissionGranted() async {
     try {
       final PermissionStatus status = await Permission.contacts.status;
@@ -70,7 +71,6 @@ class ContactService {
     }
   }
 
-  // Method to request permission to access contacts using permission_handler
   Future<Either<String, bool>> requestContactPermission() async {
     try {
       final PermissionStatus status = await Permission.contacts.request();
