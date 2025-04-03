@@ -1,8 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../src/contact/models/contact_model.dart';
-import '../../src/contact/controllers/contacts_controller.dart';
+import '../../src/contact/model/base/contact_model.dart';
+import '../../src/contact/view_model/contacts_view_model.dart';
 import 'user_service_provider.dart';
 
 final userInfoProvider = StreamProvider.family<ContactModel, String>(

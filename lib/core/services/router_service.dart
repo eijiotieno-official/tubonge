@@ -2,10 +2,10 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../src/auth/screens/auth_screen.dart';
-import '../../src/auth/views/auth_wrapper_view.dart';
-import '../../src/chat/screens/chat_detail_screen.dart';
-import '../../src/contact/screens/contacts_screen.dart';
+import '../../src/auth/view/screens/auth_screen.dart';
+import '../../src/auth/view/widgets/auth_wrapper_view.dart';
+import '../../src/chat/view/screens/chat_detail_screen.dart';
+import '../../src/contact/view/screens/contacts_screen.dart';
 import '../screens/home_screen.dart';
 
 enum Routes {
@@ -17,7 +17,7 @@ enum Routes {
   chatFromContacts,
 }
 
-class RouterService {
+class AppRouter {
   static String routesToPath(Routes route, {String? id}) {
     switch (route) {
       case Routes.authChecker:

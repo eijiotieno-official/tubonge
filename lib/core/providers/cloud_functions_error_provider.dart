@@ -1,9 +1,8 @@
-
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../services/cloud_functions_error_service.dart';
+import '../utils/cloud_functions_error_util.dart';
 
-final cloudFunctionsErrorServiceProvider = Provider<CloudFunctionsErrorService>((ref) {
-  return CloudFunctionsErrorService();
+final cloudFunctionsErrorUtilProvider =
+    Provider<CloudFunctionsErrorUtil>((ref) {
+  return CloudFunctionsErrorUtil();
 });

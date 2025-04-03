@@ -1,0 +1,117 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+
+import '../../model/base/message_model.dart';
+import '../../model/provider/message_service_provider.dart';
+import '../../model/provider/selected_messages_provider.dart';
+import 'text_message_view.dart';
+
+class MessageView extends ConsumerStatefulWidget {
+  final AutoScrollController controller;
+  final String chatId;
+  final Message message;
+  final int index;
+  const MessageView({
+    super.key,
+    required this.controller,
+    required this.chatId,
+    required this.message,
+    required this.index,
+  });
+
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _MessageViewState();
+}
+
+class _MessageViewState extends ConsumerState<MessageView> {
+  @override
+  void initState() {
+    super.initState();
+    _updateStatus();
+  }
+
+  void _updateStatus() {
+    final Message message = widget.message;
+
+    final bool shouldUpdate = message.status != MessageStatus.seen &&
+        message.sender != FirebaseAuth.instance.currentUser?.uid;
+
+    if (shouldUpdate) {
+      ref.read(messageServiceProvider).onMessageSeen(
+          userId: message.sender,
+          chatId: message.receiver,
+          messageId: message.id);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Message message = widget.message;
+
+    final bool fromCurrentUser =
+        message.sender == FirebaseAuth.instance.currentUser?.uid;
+
+    final Alignment alignment =
+        fromCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
+
+    final bool showStatus = fromCurrentUser;
+
+    final Color color = fromCurrentUser
+        ? Theme.of(context).hoverColor
+        : Theme.of(context).colorScheme.primaryContainer;
+
+    final bool isSelected = ref
+        .read(selectedMessagesProvider.notifier)
+        .isMessageSelected(chatId: widget.chatId, messageId: message.id);
+
+    return AutoScrollTag(
+      key: ValueKey(widget.index),
+      controller: widget.controller,
+      index: widget.index,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primaryContainer
+              : null,
+        ),
+        child: Align(
+          alignment: alignment,
+          child: GestureDetector(
+            onLongPress: () => ref
+                .read(selectedMessagesProvider.notifier)
+                .select(
+                    chatId: widget.chatId, message: message, isOnTap: false),
+            onTap: () => ref
+                .read(selectedMessagesProvider.notifier)
+                .select(chatId: widget.chatId, message: message, isOnTap: true),
+            child: Container(
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (message is TextMessage)
+                      TextMessageView(
+                        key: Key(message.id),
+                        message: message,
+                        showStatus: showStatus,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

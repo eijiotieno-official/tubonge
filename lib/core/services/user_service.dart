@@ -1,16 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../models/user_model.dart';
-import 'firestore_error_service.dart';
+import '../utils/firestore_error_util.dart';
+import '../utils/user_util.dart';
 
 class UserService {
-  final FirestoreErrorService _firestoreErrorService = FirestoreErrorService();
+  final FirestoreErrorUtil _firestoreErrorUtil;
+  UserService({
+    required FirestoreErrorUtil firestoreErrorUtil,
+  }) : _firestoreErrorUtil = firestoreErrorUtil;
 
-  final CollectionReference _users =
-      FirebaseFirestore.instance.collection("users");
-
+  
   Future<Either<String, UserModel>> authenticatedUserHandler(
       UserModel model) async {
     try {
@@ -23,7 +24,7 @@ class UserService {
             : await _handleExistingUser(model),
       );
     } catch (e) {
-      final errorMessage = _firestoreErrorService.handleException(e);
+      final errorMessage = _firestoreErrorUtil.handleException(e);
       return Left(errorMessage);
     }
   }
@@ -31,7 +32,7 @@ class UserService {
   Future<Either<String, bool>> _isNewUser(String userId) async {
     try {
       // Fetch the user document from Firestore
-      final userDoc = await _users.doc(userId).get();
+      final userDoc = await UserUtil.users.doc(userId).get();
 
       // Check if the document exists
       final isNew = !userDoc.exists;
@@ -53,7 +54,7 @@ class UserService {
   Future<Either<String, UserModel>> _createUser(UserModel model) async {
     try {
       UserModel updatedModel = model;
-      final documentReference = _users.doc(model.id);
+      final documentReference = UserUtil.users.doc(model.id);
 
       final tokenResult = await _getFCMToken();
       if (tokenResult.isRight()) {
@@ -103,7 +104,7 @@ class UserService {
     return tokenResult.fold(
       (error) => Left(error),
       (newToken) async {
-        final userDoc = await _users.doc(model.id).get();
+        final userDoc = await UserUtil.users.doc(model.id).get();
         if (!userDoc.exists) {
           return Left('User does not exist.');
         }
@@ -118,13 +119,13 @@ class UserService {
   Future<Either<String, UserModel>> _updateUser(UserModel model) async {
     try {
       // Check if the user document exists
-      final userDoc = await _users.doc(model.id).get();
+      final userDoc = await UserUtil.users.doc(model.id).get();
       if (!userDoc.exists) {
         return Left('User does not exist.');
       }
 
       // Update the user document in Firestore
-      await _users.doc(model.id).update(model.toMap());
+      await UserUtil.users.doc(model.id).update(model.toMap());
       return Right(model);
     } catch (e) {
       // Return an error message if an exception occurs
@@ -149,7 +150,7 @@ class UserService {
   }
 
   Stream<Either<String, UserModel>> streamUser(String userId) {
-    return _users
+    return UserUtil.users
         .doc(userId)
         .snapshots()
         .map<Either<String, UserModel>>((docSnapshot) {

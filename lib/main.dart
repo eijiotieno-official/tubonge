@@ -11,18 +11,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/services/cloud_functions_error_service.dart';
-import 'core/services/firestore_error_service.dart';
+import 'core/utils/cloud_functions_error_util.dart';
 import 'core/services/router_service.dart';
+import 'core/utils/firestore_error_util.dart';
 import 'firebase_options.dart';
-import 'src/chat/services/chat_notification_service.dart';
-import 'src/chat/services/message_service.dart';
-import 'src/contact/models/contact_model.dart';
-import 'src/contact/services/contact_service.dart';
+import 'src/chat/model/service/chat_notification_service.dart';
+import 'src/chat/model/service/message_service.dart';
+import 'src/contact/model/base/contact_model.dart';
+import 'src/contact/model/service/contact_service.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  MessageService messageService = MessageService(firestoreErrorService: FirestoreErrorService());
-  ContactService contactService = ContactService(cloudFunctionsErrorService: CloudFunctionsErrorService());
+  MessageService messageService =
+      MessageService(firestoreErrorUtil: FirestoreErrorUtil());
+  ContactService contactService =
+      ContactService(cloudFunctionsErrorUtil: CloudFunctionsErrorUtil());
 
   final Either<String, List<ContactModel>> contactsEither =
       await contactService.loadContacts();
@@ -56,7 +58,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   messageService.onMessageDelivered(
       userId: senderId, chatId: receiverId, messageId: messageId);
 
-  await ChatNotificationService.showNotification(
+  final ChatNotificationService chatNotificationService =
+      ChatNotificationService();
+
+  await chatNotificationService.showNotification(
     senderId: senderId,
     senderPhoto: senderPhoto,
     text: messageText,
@@ -87,7 +92,10 @@ Future<void> main() async {
     await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
   }
 
-  await ChatNotificationService.init();
+  final ChatNotificationService chatNotificationService =
+      ChatNotificationService();
+
+  await chatNotificationService.init();
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -109,7 +117,7 @@ class MainApp extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       themeMode: ThemeMode.system,
-      routerConfig: RouterService.router,
+      routerConfig: AppRouter.router,
     );
   }
 }
