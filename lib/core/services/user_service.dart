@@ -5,23 +5,26 @@ import '../models/user_model.dart';
 import '../utils/firestore_error_util.dart';
 import '../utils/user_util.dart';
 
+/// A service class responsible for handling user authentication and Firestore operations.
 class UserService {
   final FirestoreErrorUtil _firestoreErrorUtil;
+
   UserService({
     required FirestoreErrorUtil firestoreErrorUtil,
   }) : _firestoreErrorUtil = firestoreErrorUtil;
 
-  
+  /// Determines if the user is new or existing and handles accordingly.
   Future<Either<String, UserModel>> authenticatedUserHandler(
       UserModel model) async {
     try {
       final isNewUserResult = await _checkIfNewUser(model.id);
 
+      // Handle the user based on whether they're new or existing
       return isNewUserResult.fold(
         (error) => Left(error),
         (isNewUser) async => isNewUser
-            ? await _handleNewUser(model)
-            : await _handleExistingUser(model),
+            ? await _handleNewUser(model) // Create new user
+            : await _handleExistingUser(model), // Update existing user
       );
     } catch (e) {
       final errorMessage = _firestoreErrorUtil.handleException(e);
@@ -29,20 +32,18 @@ class UserService {
     }
   }
 
+  /// Checks if the user exists in the Firestore collection.
   Future<Either<String, bool>> _isNewUser(String userId) async {
     try {
-      // Fetch the user document from Firestore
       final userDoc = await UserUtil.users.doc(userId).get();
-
-      // Check if the document exists
-      final isNew = !userDoc.exists;
+      final isNew = !userDoc.exists; // User is new if doc doesn't exist
       return Right(isNew);
     } catch (e) {
-      // Return an error message if an exception occurs
       return Left('Error while checking if user is new: $e');
     }
   }
 
+  /// A wrapper around _isNewUser to ensure uniform error/result handling.
   Future<Either<String, bool>> _checkIfNewUser(String userId) async {
     final isNewUserResult = await _isNewUser(userId);
     return isNewUserResult.fold(
@@ -51,6 +52,7 @@ class UserService {
     );
   }
 
+  /// Creates a new user document in Firestore.
   Future<Either<String, UserModel>> _createUser(UserModel model) async {
     try {
       UserModel updatedModel = model;
@@ -58,23 +60,23 @@ class UserService {
 
       final tokenResult = await _getFCMToken();
       if (tokenResult.isRight()) {
-        // Update the user model with the FCM token
-        updatedModel =
-            updatedModel.copyWith(tokens: [tokenResult.getOrElse(() => '')]);
+        // Assign FCM token to the user model
+        updatedModel = updatedModel.copyWith(
+          tokens: [tokenResult.getOrElse(() => '')],
+        );
       } else {
-        // Return an error if FCM token fetch fails
         return Left('Failed to fetch FCM token');
       }
 
-      // Save the updated user model to Firestore
+      // Save the new user to Firestore
       await documentReference.set(updatedModel.toMap());
       return Right(updatedModel);
     } catch (e) {
-      // Return an error message if an exception occurs
       return Left('Error during user creation: $e');
     }
   }
 
+  /// Handles logic for a new user (e.g., first-time sign-in).
   Future<Either<String, UserModel>> _handleNewUser(UserModel model) async {
     final createResult = await _createUser(model);
     return createResult.fold(
@@ -83,21 +85,17 @@ class UserService {
     );
   }
 
+  /// Retrieves the FCM token used for push notifications.
   Future<Either<String, String>> _getFCMToken() async {
     try {
-      // Fetch the FCM token
       final token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
-        return Right(token);
-      } else {
-        return Left('FCM token is null');
-      }
+      return token != null ? Right(token) : Left('FCM token is null');
     } catch (e) {
-      // Return an error message if an exception occurs
       return Left('Error fetching FCM token: $e');
     }
   }
 
+  /// Handles logic for an existing user (e.g., updating tokens).
   Future<Either<String, UserModel>> _handleExistingUser(UserModel model) async {
     final tokenResult = await _getFCMToken();
 
@@ -109,33 +107,41 @@ class UserService {
           return Left('User does not exist.');
         }
 
+        // Deserialize existing user data
         final userModel =
             UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+
+        // Update user data with new token if needed
         return await _updateExistingUser(model, userModel, newToken);
       },
     );
   }
 
+  /// Updates the user's document in Firestore.
   Future<Either<String, UserModel>> _updateUser(UserModel model) async {
     try {
-      // Check if the user document exists
       final userDoc = await UserUtil.users.doc(model.id).get();
       if (!userDoc.exists) {
         return Left('User does not exist.');
       }
 
-      // Update the user document in Firestore
+      // Write updated user data to Firestore
       await UserUtil.users.doc(model.id).update(model.toMap());
       return Right(model);
     } catch (e) {
-      // Return an error message if an exception occurs
       return Left('Error while updating user: $e');
     }
   }
 
+  /// Updates the existing user model with a new token if necessary.
   Future<Either<String, UserModel>> _updateExistingUser(
-      UserModel model, UserModel userModel, String newToken) async {
+    UserModel model,
+    UserModel userModel,
+    String newToken,
+  ) async {
     final existingTokens = List<String>.from(userModel.tokens);
+
+    // Add new token only if it isn't already present
     if (newToken.isNotEmpty && !existingTokens.contains(newToken)) {
       existingTokens.add(newToken);
       model = model.copyWith(tokens: existingTokens);
@@ -149,6 +155,7 @@ class UserService {
     );
   }
 
+  /// Streams updates to the user document in real time.
   Stream<Either<String, UserModel>> streamUser(String userId) {
     return UserUtil.users
         .doc(userId)
@@ -160,13 +167,13 @@ class UserService {
           final userModel = UserModel.fromMap(data);
           return Right(userModel);
         } catch (e) {
-          final errorMsg = 'Error parsing user data: $e';
-          return Left(errorMsg);
+          return Left('Error parsing user data: $e');
         }
       } else {
         return Left('User not found.');
       }
     }).handleError((error) {
+      // Capture any unexpected stream errors
       return Left('Stream error: $error');
     });
   }

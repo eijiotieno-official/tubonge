@@ -7,10 +7,12 @@ import '../../../../core/views/error_message_view.dart';
 import '../../../../core/views/tubonge_filled_button.dart';
 import '../../model/provider/auth_state_provider.dart';
 
+/// A widget that provides a phone number input field and a confirmation button.
 class PhoneInputView extends ConsumerWidget {
-  final bool isLoading;
-  final String? errorMessage;
-  final VoidCallback? onTap;
+  final bool isLoading; // Determines if the UI should show loading state
+  final String? errorMessage; // Optional error message to display
+  final VoidCallback? onTap; // Callback when "Next" button is pressed
+
   const PhoneInputView({
     super.key,
     this.errorMessage,
@@ -21,13 +23,17 @@ class PhoneInputView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 16.0), // Horizontal padding around content
       child: Column(
-        spacing: 16.0,
+        spacing:
+            16.0, // Custom spacing between children (may not work without MainAxisAlignment)
         children: [
-          SizedBox(height: 8.0),
+          SizedBox(height: 8.0), // Spacer at the top
+
+          /// International phone input field using a package
           InternationalPhoneNumberInput(
-            isEnabled: isLoading == false,
+            isEnabled: isLoading == false, // Disable when loading
             onInputChanged: (phoneNumber) =>
                 ref.read(authStateProvider.notifier).updateState(
                       phone: PhoneModel(
@@ -35,10 +41,10 @@ class PhoneInputView extends ConsumerWidget {
                         dialCode: phoneNumber.dialCode ?? "",
                         phoneNumber: phoneNumber.phoneNumber ?? "",
                       ),
-                    ),
+                    ), // Updates state with new phone data
             autoFocus: true,
             autoFocusSearch: true,
-            formatInput: true,
+            formatInput: true, // Formats input to match phone number format
             searchBoxDecoration: InputDecoration(
               prefixIcon: Icon(Icons.search_rounded),
               border: OutlineInputBorder(
@@ -58,15 +64,21 @@ class PhoneInputView extends ConsumerWidget {
               useBottomSheetSafeArea: true,
             ),
           ),
+
+          /// Displays any error message passed to the widget
           ErrorMessageView(errorMessage: errorMessage),
-          const Spacer(),
+
+          const Spacer(), // Pushes the "Next" button to the bottom of the column
+
+          /// Button to continue to the next step
           TubongeFilledButton(
             isExtended: true,
             isLoading: isLoading,
             onTap: onTap,
             text: "Next",
           ),
-          SizedBox(height: 2.0),
+
+          SizedBox(height: 2.0), // Small space after button
         ],
       ),
     );
