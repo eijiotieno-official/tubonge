@@ -7,13 +7,10 @@ import '../../view_model/resend_code_view_model.dart';
 import '../../model/provider/auth_state_provider.dart';
 import '../../model/provider/timer_provider.dart';
 
-/// Widget for inputting OTP code during phone number verification process.
 class CodeInputView extends ConsumerWidget {
-  final bool
-      isLoading; // Indicates if a request (e.g. confirmation) is in progress
-  final String? errorMessage; // Optional error message to display
-  final VoidCallback?
-      onTap; // Callback to be triggered when the user confirms the code
+  final bool isLoading;
+  final String? errorMessage;
+  final VoidCallback? onTap;
 
   const CodeInputView({
     super.key,
@@ -24,30 +21,24 @@ class CodeInputView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Listen to the countdown timer for resending the OTP
     final int timerCount = ref.watch(timerProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
-        spacing: 16.0, // Adds spacing between children
+        spacing: 16.0,
         children: [
           const SizedBox(height: 8.0),
-
-          /// TextField for user to input OTP code
           TextField(
-            autofocus: true, // Focus this field when the widget loads
-            enabled: !isLoading, // Disable input when loading
+            autofocus: true,
+            enabled: !isLoading,
             decoration: InputDecoration(
               hintText: "Code",
             ),
-            // Save the input value to the auth state (optCode)
             onChanged: (value) => ref
                 .read(authStateProvider.notifier)
                 .updateState(optCode: value),
           ),
-
-          /// Button to resend OTP, only enabled if timer reaches 0
           TextButton(
             onPressed: timerCount == 0
                 ? () async =>
@@ -57,20 +48,14 @@ class CodeInputView extends ConsumerWidget {
                 ? const Text("Resend Code")
                 : Text("Resend Code in $timerCount seconds"),
           ),
-
-          /// Display error message if any
           ErrorMessageView(errorMessage: errorMessage),
-
-          const Spacer(), // Pushes the confirm button to the bottom
-
-          /// Confirm button to submit the entered code
+          const Spacer(),
           TubongeFilledButton(
             isExtended: true,
             isLoading: isLoading,
             onTap: onTap,
             text: "Confirm",
           ),
-
           const SizedBox(height: 2.0),
         ],
       ),

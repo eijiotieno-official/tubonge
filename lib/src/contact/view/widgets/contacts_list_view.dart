@@ -4,16 +4,11 @@ import 'package:flutter/material.dart';
 import '../../model/base/contact_model.dart';
 import 'contact_view.dart';
 
-/// A scrollable list of contacts with pull-to-refresh functionality.
-/// Displays each contact using the [ContactView] widget.
 class ContactsListView extends StatelessWidget {
-  /// List of contacts to be displayed.
   final List<ContactModel> contacts;
 
-  /// Callback triggered when the user performs a pull-to-refresh gesture.
   final Future<void> Function() onRefresh;
 
-  /// Callback when a contact is tapped.
   final ValueChanged<ContactModel> onContactTap;
 
   const ContactsListView({
@@ -26,10 +21,7 @@ class ContactsListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomRefreshIndicator(
-      // Trigger the provided refresh callback
       onRefresh: onRefresh,
-
-      // Custom indicator builder
       builder: (
         BuildContext context,
         Widget child,
@@ -41,7 +33,7 @@ class ContactsListView extends StatelessWidget {
             return Stack(
               alignment: Alignment.topCenter,
               children: [
-                child, // The list or empty state content below
+                child,
                 if (controller.value > 0)
                   Opacity(
                     opacity: controller.value,
@@ -57,12 +49,10 @@ class ContactsListView extends StatelessWidget {
           },
         );
       },
-
-      // The main child content of the scroll view
       child: contacts.isEmpty
-          ? const Center(child: Text("No contacts available")) // Empty state
+          ? const Center(child: Text("No contacts available"))
           : ListView.builder(
-              physics: BouncingScrollPhysics(), // Smooth iOS-style scroll
+              physics: BouncingScrollPhysics(),
               itemCount: contacts.length,
               itemBuilder: (context, index) {
                 final contact = contacts[index];

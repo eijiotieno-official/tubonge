@@ -10,77 +10,64 @@ import '../model/provider/timer_provider.dart';
 import '../model/service/firebase_auth_service.dart';
 import '../model/util/firebase_auth_error_util.dart';
 
-/// ViewModel for resending OTP verification codes.
-/// Manages async state and handles Firebase phone auth callbacks.
 class ResendCodeViewModel extends StateNotifier<AsyncValue> {
-  final FirebaseAuthService _firebaseAuthService; // Firebase Auth operations
-  final FirebaseAuthErrorUtil
-      _firebaseAuthErrorUtil; // Handles auth-related error formatting
-  final Ref _ref; // Riverpod reference to access providers
+  final FirebaseAuthService _firebaseAuthService;
+  final FirebaseAuthErrorUtil _firebaseAuthErrorUtil;
+  final Ref _ref;
 
   ResendCodeViewModel(
     this._firebaseAuthService,
     this._firebaseAuthErrorUtil,
     this._ref,
-  ) : super(const AsyncValue.data(null)); // Initial state is "idle"
+  ) : super(const AsyncValue.data(null));
 
-  final Logger _logger = Logger(); // Logger for debug/info/error logs
+  final Logger _logger = Logger();
 
-  /// Initiates the resend code process
   Future<void> call() async {
     try {
       _logger.i("Resend code process started.");
-      state = const AsyncValue.loading(); // Set state to loading
+      state = const AsyncValue.loading();
 
-      // Fetch current auth state
       final AuthState authState = _ref.watch(authStateProvider);
 
-      final PhoneModel? phone = authState.phone; // Get stored phone number
-      final int? resendToken =
-          authState.resendToken; // Get last known resend token
+      final PhoneModel? phone = authState.phone;
+      final int? resendToken = authState.resendToken;
 
       _logger.i("Resend code - phone: $phone, resendToken: $resendToken");
 
-      // Attempt to resend the verification code
       final result = await _firebaseAuthService.resendCode(
         phone: phone,
         resendToken: resendToken,
-        verificationFailed:
-            _verificationFailed, // Callback if verification fails
-        codeSent: _codeSent, // Callback when code is sent
-        codeAutoRetrievalTimeout: _codeAutoRetrievalTimeout, // Timeout callback
+        verificationFailed: _verificationFailed,
+        codeSent: _codeSent,
+        codeAutoRetrievalTimeout: _codeAutoRetrievalTimeout,
       );
 
       if (!mounted) return;
 
-      // Update state depending on result
       state = result.fold(
-        (error) => AsyncValue.error(error, StackTrace.current), // On failure
+        (error) => AsyncValue.error(error, StackTrace.current),
         (_) {
-          return AsyncValue.data(null); // On success, return null data
+          return AsyncValue.data(null);
         },
       );
     } catch (e) {
-      // Handle general exceptions (not returned by the service)
       final String message = _firebaseAuthErrorUtil.handleException(e);
       _logger.e("Exception in resend code process: $message");
       state = AsyncValue.error(message, StackTrace.current);
     }
   }
 
-  /// Callback for Firebase when verification fails
   void _verificationFailed(FirebaseAuthException error) {
     final String message = _firebaseAuthErrorUtil.handleException(error);
     _logger.e("Verification failed: $message");
     state = AsyncValue.error(message, StackTrace.current);
   }
 
-  /// Callback when the verification code is successfully sent
   void _codeSent(String verificationId, [int? forceResendingToken]) {
     _logger.i("Code sent. Verification ID: $verificationId");
     _logger.i("Resend token: ${forceResendingToken ?? 'None'}");
 
-    // Update auth state with new verification ID and token
     _ref.read(authStateProvider.notifier).updateState(
           resendToken: forceResendingToken,
           verificationId: verificationId,
@@ -88,16 +75,13 @@ class ResendCodeViewModel extends StateNotifier<AsyncValue> {
 
     _logger.i("Auth state updated with verification ID and resend token.");
 
-    // Start countdown timer for resending
     _ref.read(timerProvider.notifier).startTimer();
     _logger.i("Timer started.");
   }
 
-  /// Callback when auto-retrieval of the OTP code times out
   void _codeAutoRetrievalTimeout(String verificationId) {
     _logger.i("Code auto retrieval timeout. Verification ID: $verificationId");
 
-    // Update only the verification ID in auth state
     _ref.read(authStateProvider.notifier).updateState(
           verificationId: verificationId,
         );
@@ -106,7 +90,6 @@ class ResendCodeViewModel extends StateNotifier<AsyncValue> {
   }
 }
 
-/// Riverpod provider for exposing ResendCodeViewModel to the app
 final resendCodeViewModelProvider =
     StateNotifierProvider<ResendCodeViewModel, AsyncValue>(
   (ref) {

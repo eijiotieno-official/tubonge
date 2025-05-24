@@ -64,8 +64,10 @@ class DefaultFirebaseOptions {
     projectId: 'test-a49af',
     databaseURL: 'https://test-a49af-default-rtdb.firebaseio.com',
     storageBucket: 'test-a49af.appspot.com',
-    androidClientId: '1025584618741-71ikj6d2f2575ot25elffijpv219lt4i.apps.googleusercontent.com',
-    iosClientId: '1025584618741-mp7rh2a7unetbcm5889ldet48djgu2uk.apps.googleusercontent.com',
+    androidClientId:
+        '1025584618741-71ikj6d2f2575ot25elffijpv219lt4i.apps.googleusercontent.com',
+    iosClientId:
+        '1025584618741-mp7rh2a7unetbcm5889ldet48djgu2uk.apps.googleusercontent.com',
     iosBundleId: 'com.example.tubonge',
   );
 
@@ -77,5 +79,4 @@ class DefaultFirebaseOptions {
     databaseURL: 'https://test-a49af-default-rtdb.firebaseio.com',
     storageBucket: 'test-a49af.appspot.com',
   );
-
 }

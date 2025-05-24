@@ -1,10 +1,5 @@
 enum MessageType {
   text,
-  // audio,
-  // image,
-  // video,
-  // voice,
-  // document,
   none,
 }
 
