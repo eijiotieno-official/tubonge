@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/shared/tubonge_button.dart';
+import '../../../../core/widgets/shared/tubonge_input.dart';
 import '../../model/base/chat_model.dart';
 import '../../model/base/message_model.dart';
 import '../../model/provider/chat_service_provider.dart';
@@ -108,76 +110,49 @@ class _MessageInputViewState extends ConsumerState<MessageInputView> {
           color: theme.colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(24.0),
         ),
-        child: Stack(
-          children: [
-            _buttons(),
-            _textField(maxHeight: maxHeight),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: maxHeight,
+                  ),
+                  child: TubongeInput(
+                    controller: _textEditingController,
+                    onChanged: _typing,
+                    maxLines: null,
+                    minLines: 1,
+                    hint: 'Type a message...',
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 8.0,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8.0),
+              TubongeButton(
+                text: '',
+                onPressed: _isValidToSend ? _send : null,
+                icon: const Icon(Icons.send_rounded),
+                variant: TubongeButtonVariant.filled,
+                borderRadius: BorderRadius.circular(20.0),
+                width: 40.0,
+                height: 40.0,
+                padding: EdgeInsets.zero,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _textField({
-    required double maxHeight,
-  }) =>
-      Row(
-        children: [
-          IconButton(
-            onPressed: null,
-            icon: Icon(
-              Icons.image_rounded,
-              color: Colors.transparent,
-            ),
-          ),
-          Expanded(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: maxHeight,
-              ),
-              child: Scrollbar(
-                radius: Radius.circular(8.0),
-                child: TextField(
-                  maxLines: null,
-                  minLines: 1,
-                  controller: _textEditingController,
-                  decoration: InputDecoration(
-                    hintText: "Message",
-                    border: InputBorder.none,
-                  ),
-                  onChanged: _typing,
-                ),
-              ),
-            ),
-          ),
-          if (_isValidToSend)
-            IconButton(
-              onPressed: _send,
-              icon: Icon(
-                Icons.arrow_upward_rounded,
-                color: Colors.transparent,
-              ),
-            ),
-        ],
-      );
-
-  Widget _buttons() => Positioned.fill(
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton.filled(
-                onPressed: null,
-                icon: Icon(Icons.image_rounded),
-              ),
-              if (_isValidToSend)
-                IconButton.filled(
-                  onPressed: _send,
-                  icon: Icon(Icons.arrow_upward_rounded),
-                ),
-            ],
-          ),
-        ),
-      );
+  @override
+  void dispose() {
+    _textEditingController.dispose();
+    super.dispose();
+  }
 }

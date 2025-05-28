@@ -21,6 +21,9 @@ enum Routes {
 
 /// Class that handles all routing logic for the application
 class AppRouter {
+  /// Private constructor to prevent instantiation
+  AppRouter._();
+
   /// Converts [Routes] enum to corresponding path string.
   /// If [id] is needed in the route (like for chat screens), it is interpolated into the path.
   static String routesToPath(Routes route, {String? id}) {
@@ -42,14 +45,15 @@ class AppRouter {
 
   /// Main router instance configured with all routes using GoRouter
   static final GoRouter router = GoRouter(
-    initialLocation:
-        routesToPath(Routes.authChecker), // Initial route of the app
+    initialLocation: routesToPath(Routes.authChecker),
+    debugLogDiagnostics: true,
+    errorBuilder: (context, state) => _buildErrorScreen(context, state),
     routes: <GoRoute>[
       // Root route, checks auth state and wraps the app accordingly
       GoRoute(
         path: routesToPath(Routes.authChecker),
         builder: (BuildContext context, GoRouterState state) {
-          return AuthWrapperView();
+          return const AuthWrapperView();
         },
       ),
       // Auth screen route
@@ -69,25 +73,75 @@ class AppRouter {
         routes: [
           // Nested route for chat detail screen (from home)
           GoRoute(
-            path: "chat/:id", // Uses path parameter `id`
+            path: "chat/:id",
             builder: (BuildContext context, GoRouterState state) {
-              return ChatDetailScreen(
-                chatId: state.pathParameters['id'] ??
-                    "", // Extracts `id` from route
-              );
+              final chatId = state.pathParameters['id'];
+              if (chatId == null || chatId.isEmpty) {
+                return _buildErrorScreen(
+                  context,
+                  state,
+                  error: 'Invalid chat ID',
+                );
+              }
+              return ChatDetailScreen(chatId: chatId);
             },
           ),
           // Nested route for contacts screen
           GoRoute(
             path: "contacts",
             builder: (BuildContext context, GoRouterState state) {
-              return ContactsScreen();
+              return const ContactsScreen();
             },
           ),
         ],
       ),
     ],
   );
+
+  /// Builds an error screen for invalid routes or errors
+  static Widget _buildErrorScreen(
+    BuildContext context,
+    GoRouterState state, {
+    String? error,
+  }) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Error'),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                color: Colors.red,
+                size: 48,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                error ?? 'Page not found',
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'The requested page "${state.uri.path}" could not be found.',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => router.go(routesToPath(Routes.home)),
+                child: const Text('Go to Home'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   /// Replace current route with a new one and optionally pass [ReceivedAction] data
   static void replaceTo(Routes route, {ReceivedAction? receivedAction}) {
@@ -107,11 +161,24 @@ class AppRouter {
 
   /// Navigate to chat screen from home, using provided [userId]
   static void goToChat(String? userId) {
+    if (userId == null || userId.isEmpty) {
+      throw ArgumentError('User ID cannot be null or empty');
+    }
     router.go(routesToPath(Routes.chatFromHome, id: userId));
   }
 
   /// Navigate to contacts screen
-  static void goToContacts() async {
+  static void goToContacts() {
     router.go(routesToPath(Routes.contacts));
+  }
+
+  /// Navigate back to the previous screen
+  static void goBack() {
+    router.pop();
+  }
+
+  /// Check if we can navigate back
+  static bool canGoBack() {
+    return router.canPop();
   }
 }

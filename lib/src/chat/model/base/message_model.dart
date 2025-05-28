@@ -1,3 +1,5 @@
+import '../../../../core/models/base_model.dart';
+
 enum MessageType {
   text,
   none,
@@ -48,7 +50,7 @@ extension MessageStatusExtension on MessageStatus {
   }
 }
 
-abstract class Message {
+abstract class Message extends BaseModel {
   final String id;
   final String sender;
   final String receiver;
@@ -74,7 +76,17 @@ abstract class Message {
     DateTime? timeSent,
   });
 
-  Map<String, dynamic> toMap();
+  @override
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'sender': sender,
+      'receiver': receiver,
+      'type': MessageTypeExtension.toStringValue(type),
+      'status': MessageStatusExtension.toStringValue(status),
+      'timeSent': timeSent,
+    };
+  }
 
   static Message fromMap(Map<String, dynamic> map) {
     final messageType = MessageTypeExtension.toTypeValue(map["type"]);
@@ -118,14 +130,9 @@ class TextMessage extends Message {
 
   @override
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
+    return {
+      ...super.toMap(),
       'text': text,
-      'id': id,
-      'sender': sender,
-      'receiver': receiver,
-      'status': MessageStatusExtension.toStringValue(status),
-      'timeSent': timeSent,
-      'type': MessageTypeExtension.toStringValue(type),
     };
   }
 
