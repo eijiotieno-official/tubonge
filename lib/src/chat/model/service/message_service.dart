@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../../../core/models/received_message_model.dart';
 import '../../../../core/utils/firestore_error_util.dart';
 import '../base/message_model.dart';
 import '../util/chat_utils.dart';
@@ -131,14 +132,12 @@ class MessageService {
   }
 
   void onMessageDelivered({
-    required String userId,
-    required String chatId,
-    required String messageId,
+    required ReceivedMessage message,
   }) {
     ChatUtil.messages(
-      userId: userId,
-      chatId: chatId,
-    ).doc(messageId).update(
+      userId: message.senderId,
+      chatId: message.receiverId,
+    ).doc(message.messageId).update(
       {
         'status': MessageStatusExtension.toStringValue(MessageStatus.delivered),
       },

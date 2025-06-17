@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 
+import '../../../../core/models/received_message_model.dart';
 import '../../../../core/services/router_service.dart';
 
 class ChatNotificationService {
@@ -54,12 +55,7 @@ class ChatNotificationService {
     );
   }
 
-  Future<void> showNotification({
-    required String senderId,
-    required String senderPhoto,
-    required String senderName,
-    required String text,
-  }) async {
+  Future<void> showNotification({required ReceivedMessage message}) async {
     final Random random = Random();
 
     final int id = random.nextInt(10000) + 1;
@@ -68,13 +64,10 @@ class ChatNotificationService {
       content: NotificationContent(
         id: id,
         channelKey: 'message_channel',
-        title: senderName,
-        bigPicture: senderPhoto,
-        body: text,
-        payload: {
-          'chatId': senderId,
-          'text': text,
-        },
+        title: message.senderName,
+        bigPicture: message.senderPhoto,
+        body: message.text,
+        payload: message.toPayload(),
         notificationLayout: NotificationLayout.Messaging,
       ),
     );

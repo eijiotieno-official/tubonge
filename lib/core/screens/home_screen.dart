@@ -1,15 +1,14 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:collection/collection.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../src/auth/view_model/sign_out_view_model.dart';
+import '../../src/chat/model/provider/message_service_provider.dart';
 import '../../src/chat/view/widgets/chats_list_view.dart';
 import '../../src/contact/view/screens/contacts_screen.dart';
-import '../../src/chat/model/provider/message_service_provider.dart';
 import '../../src/contact/view_model/contacts_view_model.dart';
+import '../models/received_message_model.dart';
 import '../services/router_service.dart';
 import '../views/avatar_view.dart';
 
@@ -32,41 +31,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // If there is a received push notification action (like a direct message),
     // navigate to the corresponding chat screen.
     if (widget.receivedAction != null) {
-      final userId = widget.receivedAction?.payload!['chatId'];
-      if (userId != null) {
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) {
-            AppRouter.goToChat(userId); // Navigate to chat with the user
-          },
-        );
-      }
+      final message =
+          ReceivedMessage.fromPayload(widget.receivedAction?.payload);
+
+      final userId = message.receiverId;
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) {
+          AppRouter.goToChat(userId); // Navigate to chat with the user
+        },
+      );
     }
 
     // Listen for incoming Firebase push notifications when the app is in the foreground
     FirebaseMessaging.onMessage.listen(
       (RemoteMessage message) {
-        final data = message.data;
-        final senderId = data['sender_id'];
-        final messageId = data['message_id'];
-        final messageText = data['message_text'];
-        final senderPhone = data['sender_phone'];
-        final senderPhoto = data['sender_photo'];
-
         // Watch the contacts list from Riverpod
         final contacts = ref.watch(contactsProvider).value ?? [];
 
-        // Find the contact that matches the sender's ID
-        final contact =
-            contacts.firstWhereOrNull((contact) => contact.id == senderId);
-
-        String title = contact == null ? senderPhone : contact.name;
+        final receivedMessage = ReceivedMessage.fromRemoteMessage(
+            message: message, contacts: contacts);
 
         // Mark the message as delivered
-        ref.read(messageServiceProvider).onMessageDelivered(
-              userId: senderId,
-              chatId: FirebaseAuth.instance.currentUser!.uid,
-              messageId: messageId,
-            );
+        ref
+            .read(messageServiceProvider)
+            .onMessageDelivered(message: receivedMessage);
 
         // Show a snackbar with the message details
         if (mounted) {
@@ -79,10 +67,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               behavior: SnackBarBehavior.floating,
               content: ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading:
-                    AvatarView(imageUrl: senderPhoto), // Display sender's photo
-                title: Text(title), // Display sender's name
-                subtitle: Text(messageText), // Display message content
+                leading: AvatarView(
+                    imageUrl:
+                        receivedMessage.senderPhoto), // Display sender's photo
+                title:
+                    Text(receivedMessage.senderName), // Display sender's name
+                subtitle: Text(receivedMessage.text), // Display message content
               ),
             ),
           );
