@@ -4,7 +4,6 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 import '../../../../core/models/phone_model.dart';
 import '../../../../core/views/error_message_view.dart';
-import '../../../../core/views/tubonge_filled_button.dart';
 import '../../model/provider/auth_state_provider.dart';
 
 class PhoneInputView extends ConsumerWidget {
@@ -40,7 +39,13 @@ class PhoneInputView extends ConsumerWidget {
             autoFocus: true,
             autoFocusSearch: true,
             formatInput: true,
+            inputDecoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
             searchBoxDecoration: InputDecoration(
+              hintText: "Search",
               prefixIcon: Icon(Icons.search_rounded),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
@@ -53,20 +58,22 @@ class PhoneInputView extends ConsumerWidget {
             autoValidateMode: AutovalidateMode.disabled,
             selectorConfig: SelectorConfig(
               showFlags: true,
+              trailingSpace: false,
+              leadingPadding: 16.0,
               setSelectorButtonAsPrefixIcon: true,
               selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-              trailingSpace: false,
               useBottomSheetSafeArea: true,
             ),
           ),
           ErrorMessageView(errorMessage: errorMessage),
           const Spacer(),
-          TubongeFilledButton(
-            isExtended: true,
-            isLoading: isLoading,
-            onTap: onTap,
-            text: "",
-          ),
+          if (isLoading == false)
+            FilledButton(
+              onPressed: onTap,
+              child: Text("Continue"),
+            )
+          else
+            CircularProgressIndicator(),
           SizedBox(height: 2.0),
         ],
       ),

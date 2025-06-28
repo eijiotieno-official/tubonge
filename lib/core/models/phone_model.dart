@@ -64,4 +64,6 @@ class PhoneModel {
   @override
   int get hashCode =>
       isoCode.hashCode ^ dialCode.hashCode ^ phoneNumber.hashCode;
+
+  bool get isValidPhoneNumber => phoneNumber.replaceAll(dialCode, "").isNotEmpty;
 }

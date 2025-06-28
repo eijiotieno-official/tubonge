@@ -6,7 +6,16 @@ from src.core.models.user_model import UserModel
 
 logger = logging.getLogger()
 
-db = firestore.client()
+# Use lazy initialization for Firestore client
+_db = None
+
+
+def get_db():
+    """Lazy initialization of Firestore client"""
+    global _db
+    if _db is None:
+        _db = firestore.client()
+    return _db
 
 
 def has_seven_digit_match(phone_number1: str, phone_number2: str) -> bool:
@@ -25,8 +34,8 @@ def is_direct_match(phone_number1: str, phone_number2: str) -> bool:
 def get_registered_contacts(contacts: List[ContactModel]) -> List[ContactModel]:
 
     logger.debug("Fetching users from Firestore")
-    # Reference to the 'users' collection in Firestore
-    users_ref = db.collection("users")
+    # Reference to the 'users' collection in Firestore using lazy initialization
+    users_ref = get_db().collection("users")
 
     # Fetch all users from Firestore
     results = users_ref.stream()

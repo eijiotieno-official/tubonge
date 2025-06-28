@@ -11,8 +11,10 @@ def get_tokens(user_id: str) -> Tuple[List[str], str, str]:
     try:
         _logger.info(f"Fetching tokens for user ID: {user_id}")
 
-        # Fetch user document snapshot
-        user_data_snapshot = FirebaseCollections.users.document(user_id).get()
+        # Fetch user document snapshot using lazy initialization
+        user_data_snapshot = (
+            FirebaseCollections.get_users_collection().document(user_id).get()
+        )
 
         # Check if the user document exists
         if not user_data_snapshot.exists:

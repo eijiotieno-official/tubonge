@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/views/error_message_view.dart';
-import '../../../../core/views/tubonge_filled_button.dart';
 import '../../view_model/resend_code_view_model.dart';
 import '../../model/provider/auth_state_provider.dart';
 import '../../model/provider/timer_provider.dart';
@@ -50,12 +49,13 @@ class CodeInputView extends ConsumerWidget {
           ),
           ErrorMessageView(errorMessage: errorMessage),
           const Spacer(),
-          TubongeFilledButton(
-            isExtended: true,
-            isLoading: isLoading,
-            onTap: onTap,
-            text: "Confirm",
-          ),
+          if (isLoading == false)
+            FilledButton(
+              onPressed: onTap,
+              child: Text("Continue"),
+            )
+          else
+            CircularProgressIndicator(),
           const SizedBox(height: 2.0),
         ],
       ),

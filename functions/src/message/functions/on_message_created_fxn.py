@@ -3,11 +3,11 @@ from firebase_functions.firestore_fn import (
     Event,
     DocumentSnapshot,
 )
-from src.message.models.message import *
-from src.message.services.get_tokens import *
-from src.message.services.update_message_status import *
-from src.message.services.send_notification import *
-from src.message.services.create_copy_for_receiver import *
+from src.message.models.message import Message, TextMessage, MessageStatus
+from src.message.services.get_tokens import get_tokens
+from src.message.services.update_message_status import update_message_status
+from src.message.services.send_notification import send_notifications
+from src.message.services.create_copy_for_receiver import create_copy_for_receiver
 import logging
 
 # Set up logger

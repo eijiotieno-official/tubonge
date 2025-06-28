@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/models/received_message_model.dart';
 import 'core/services/router_service.dart';
+import 'core/services/theme_service.dart';
 import 'core/utils/cloud_functions_error_util.dart';
 import 'core/utils/firestore_error_util.dart';
 import 'firebase_options.dart';
@@ -50,12 +51,12 @@ Future<void> main() async {
     androidProvider: AndroidProvider.debug,
   );
 
-  if (kDebugMode) {
-    FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
-    await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
-    FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
-    await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
-  }
+  // if (kDebugMode) {
+  //   FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
+  //   await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  //   FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
+  //   await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
+  // }
 
   final ChatNotificationService chatNotificationService =
       ChatNotificationService();
@@ -72,14 +73,8 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      theme: ThemeData(
-        colorSchemeSeed: Colors.green,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        colorSchemeSeed: Colors.green,
-        brightness: Brightness.dark,
-      ),
+      theme: ThemeService.lightTheme,
+      darkTheme: ThemeService.darkTheme,
       themeMode: ThemeMode.system,
       routerConfig: AppRouter.router,
     );

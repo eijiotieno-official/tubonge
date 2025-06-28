@@ -15,6 +15,7 @@ class ContactsListView extends StatelessWidget {
     required this.onRefresh,
     required this.onContactTap,
   });
+  
 
   @override
   Widget build(BuildContext context) {
