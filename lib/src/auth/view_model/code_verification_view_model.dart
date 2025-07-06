@@ -17,14 +17,13 @@ class CodeVerificationViewModel extends StateNotifier<AsyncValue> {
   CodeVerificationViewModel(this._firebaseAuthService, this._ref)
       : super(const AsyncValue.data(null));
 
-  Future<void> call() async {
+  Future<void> call(String smsCode) async {
     _logger.i("Starting code verification...");
     state = const AsyncValue.loading();
 
     final AuthState authState = _ref.watch(authStateProvider);
 
     final String? verificationId = authState.verificationId;
-    final String? smsCode = authState.optCode;
 
     _logger.i("Using verificationId: $verificationId, smsCode: $smsCode");
 

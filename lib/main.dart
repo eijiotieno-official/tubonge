@@ -51,12 +51,12 @@ Future<void> main() async {
     androidProvider: AndroidProvider.debug,
   );
 
-  // if (kDebugMode) {
-  //   FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
-  //   await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
-  //   FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
-  //   await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
-  // }
+  if (kDebugMode) {
+    FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
+    await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+    FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
+    await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
+  }
 
   final ChatNotificationService chatNotificationService =
       ChatNotificationService();

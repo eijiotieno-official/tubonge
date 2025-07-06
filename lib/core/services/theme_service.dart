@@ -14,6 +14,27 @@ class ThemeService {
         ),
       );
 
+  static OutlinedButtonThemeData get outlinedButtonTheme =>
+      OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: Size(double.infinity, 50),
+          backgroundColor: primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+      );
+
+  static TextButtonThemeData get textButtonTheme => TextButtonThemeData(
+        style: TextButton.styleFrom(
+          minimumSize: Size(double.infinity, 50),
+          backgroundColor: primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+      );
+
   static ProgressIndicatorThemeData get progressIndicatorTheme =>
       ProgressIndicatorThemeData(
         strokeCap: StrokeCap.round,

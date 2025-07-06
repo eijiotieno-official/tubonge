@@ -80,6 +80,7 @@ class TubongeButton extends StatelessWidget {
         return ElevatedButton(
           onPressed: isLoading ? null : onPressed,
           style: ElevatedButton.styleFrom(
+            minimumSize: Size(double.infinity, 50),
             backgroundColor: backgroundColor ?? theme.colorScheme.primary,
             foregroundColor: textColor ?? theme.colorScheme.onPrimary,
             padding: padding ?? defaultPadding,
@@ -94,6 +95,7 @@ class TubongeButton extends StatelessWidget {
         return OutlinedButton(
           onPressed: isLoading ? null : onPressed,
           style: OutlinedButton.styleFrom(
+            minimumSize: Size(double.infinity, 50),
             foregroundColor: textColor ?? theme.colorScheme.primary,
             side: BorderSide(
               color: backgroundColor ?? theme.colorScheme.primary,
@@ -110,6 +112,7 @@ class TubongeButton extends StatelessWidget {
         return TextButton(
           onPressed: isLoading ? null : onPressed,
           style: TextButton.styleFrom(
+            minimumSize: Size(double.infinity, 50),
             foregroundColor: textColor ?? theme.colorScheme.primary,
             padding: padding ?? defaultPadding,
             shape: RoundedRectangleBorder(

@@ -21,15 +21,15 @@ class PhoneVerificationViewModel extends StateNotifier<AsyncValue> {
 
   final Logger _logger = Logger();
 
-  Future<void> call() async {
+  Future<void> call(PhoneModel phone) async {
     try {
-      PhoneModel? phone = _ref.watch(authStateProvider).phone;
       _logger.i("Starting phone verification...");
 
       state = AsyncValue.loading();
+
       _logger.i("State changed to loading.");
 
-      _logger.i("Phone number provided: ${phone?.phoneNumber}");
+      _logger.i("Phone number provided: ${phone.phoneNumber}");
 
       final Either<String, void> result =
           await _firebaseAuthService.verifyPhoneNumber(

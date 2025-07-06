@@ -2,25 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/views/error_message_view.dart';
-import '../../view_model/resend_code_view_model.dart';
-import '../../model/provider/auth_state_provider.dart';
+import '../../../../core/widgets/shared/tubonge_button.dart';
 import '../../model/provider/timer_provider.dart';
+import '../../view_model/code_verification_view_model.dart';
+import '../../view_model/resend_code_view_model.dart';
 
-class CodeInputView extends ConsumerWidget {
-  final bool isLoading;
-  final String? errorMessage;
-  final VoidCallback? onTap;
-
-  const CodeInputView({
-    super.key,
-    required this.isLoading,
-    this.errorMessage,
-    this.onTap,
-  });
+class CodeInputView extends ConsumerStatefulWidget {
+  const CodeInputView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final int timerCount = ref.watch(timerProvider);
+  ConsumerState<CodeInputView> createState() => _CodeInputViewState();
+}
+
+class _CodeInputViewState extends ConsumerState<CodeInputView> {
+  final TextEditingController _codeController = TextEditingController();
+
+  Future<void> _onContinue() async {
+    await ref.read(codeVerificationViewModelProvider.notifier).call(
+          _codeController.text.trim(),
+        );
+  }
+
+  bool get _isCodeValid => _codeController.text.trim().isNotEmpty;
+
+  @override
+  Widget build(BuildContext context) {
+    int timerCount = ref.watch(timerProvider);
+
+    AsyncValue codeVerificationState =
+        ref.watch(codeVerificationViewModelProvider);
+
+    bool isLoading = codeVerificationState.isLoading;
+
+    String? errorMessage = codeVerificationState.error?.toString();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -29,14 +43,15 @@ class CodeInputView extends ConsumerWidget {
         children: [
           const SizedBox(height: 8.0),
           TextField(
+            controller: _codeController,
             autofocus: true,
             enabled: !isLoading,
             decoration: InputDecoration(
               hintText: "Code",
             ),
-            onChanged: (value) => ref
-                .read(authStateProvider.notifier)
-                .updateState(optCode: value),
+            onChanged: (value) {
+              setState(() {});
+            },
           ),
           TextButton(
             onPressed: timerCount == 0
@@ -49,13 +64,11 @@ class CodeInputView extends ConsumerWidget {
           ),
           ErrorMessageView(errorMessage: errorMessage),
           const Spacer(),
-          if (isLoading == false)
-            FilledButton(
-              onPressed: onTap,
-              child: Text("Continue"),
-            )
-          else
-            CircularProgressIndicator(),
+          TubongeButton(
+            text: "Continue",
+            onPressed: _isCodeValid ? _onContinue : null,
+            isLoading: isLoading,
+          ),
           const SizedBox(height: 2.0),
         ],
       ),
