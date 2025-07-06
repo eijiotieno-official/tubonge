@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart';
 
 import '../../../core/models/phone_model.dart';
 import '../model/base/auth_state_model.dart';
@@ -15,10 +14,7 @@ class ChangePhoneNumberNotifier extends StateNotifier<AsyncValue<bool>> {
   ChangePhoneNumberNotifier(this._firebaseAuthService, this._ref)
       : super(const AsyncValue.data(false));
 
-  final Logger _logger = Logger();
-
   Future<void> call() async {
-    _logger.i("Change phone number process started.");
     state = const AsyncValue.loading();
 
     final AuthState authState = _ref.watch(authStateProvider);
@@ -26,9 +22,6 @@ class ChangePhoneNumberNotifier extends StateNotifier<AsyncValue<bool>> {
     final PhoneModel? phone = authState.phone;
     final String? verificationId = authState.verificationId;
     final String? smsCode = authState.optCode;
-
-    _logger.i(
-        "Change phone number - phone: $phone, verificationId: $verificationId, smsCode: $smsCode");
 
     final Either<String, bool> result =
         await _firebaseAuthService.changePhoneNumber(
@@ -44,8 +37,8 @@ class ChangePhoneNumberNotifier extends StateNotifier<AsyncValue<bool>> {
   }
 }
 
-final changePhoneNumberProvider =
-    StateNotifierProvider<ChangePhoneNumberNotifier, AsyncValue<bool>>(
+final changePhoneNumberProvider = StateNotifierProvider.autoDispose<
+    ChangePhoneNumberNotifier, AsyncValue<bool>>(
   (ref) {
     final FirebaseAuthService firebaseAuthService =
         ref.watch(firebaseAuthServiceProvider);

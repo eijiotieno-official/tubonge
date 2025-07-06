@@ -35,8 +35,9 @@ class FirebaseAuthService {
       await _firebaseAuth.verifyPhoneNumber(
         phoneNumber: phone.phoneNumber,
         verificationCompleted: (phoneAuthCredential) async {
-          final Either<String, User?> result =
-              await signInWithCredential(phoneAuthCredential);
+          final Either<String, User?> result = await signInWithCredential(
+              phoneAuthCredential,
+              phoneNumber: phone.phoneNumber);
 
           result.fold(
             (error) {
@@ -64,7 +65,8 @@ class FirebaseAuthService {
 
       return Right(null);
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e);
+      final message = _firebaseAuthErrorUtil.handleException(e,
+          phoneNumber: phone?.phoneNumber);
       return Left(message);
     }
   }
@@ -84,12 +86,11 @@ class FirebaseAuthService {
         smsCode: smsCode,
       );
 
-      final userCredentialResult = await signInWithCredential(credential);
+      final userCredentialResult = await signInWithCredential(credential,
+          phoneNumber: phone.phoneNumber);
 
-      userCredentialResult.fold(
-        (error) {
-          return Left(error);
-        },
+      return userCredentialResult.fold(
+        (error) => Left(error),
         (user) async {
           UserModel model = UserModel.empty;
 
@@ -105,10 +106,9 @@ class FirebaseAuthService {
           return Right(user);
         },
       );
-
-      return Right(null);
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e);
+      final message = _firebaseAuthErrorUtil.handleException(e,
+          phoneNumber: phone.phoneNumber);
       return Left(message);
     }
   }
@@ -133,8 +133,9 @@ class FirebaseAuthService {
         phoneNumber: phone.phoneNumber,
         forceResendingToken: resendToken,
         verificationCompleted: (phoneAuthCredential) async {
-          final Either<String, User?> result =
-              await signInWithCredential(phoneAuthCredential);
+          final Either<String, User?> result = await signInWithCredential(
+              phoneAuthCredential,
+              phoneNumber: phone.phoneNumber);
 
           result.fold(
             (error) {
@@ -161,7 +162,8 @@ class FirebaseAuthService {
 
       return Right(true);
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e);
+      final message = _firebaseAuthErrorUtil.handleException(e,
+          phoneNumber: phone?.phoneNumber);
       return Left(message);
     }
   }
@@ -191,7 +193,8 @@ class FirebaseAuthService {
 
       return Right(true);
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e);
+      final message = _firebaseAuthErrorUtil.handleException(e,
+          phoneNumber: newPhone?.phoneNumber);
       return Left(message);
     }
   }
@@ -221,14 +224,16 @@ class FirebaseAuthService {
   }
 
   Future<Either<String, User?>> signInWithCredential(
-      PhoneAuthCredential phoneAuthCredential) async {
+      PhoneAuthCredential phoneAuthCredential,
+      {String? phoneNumber}) async {
     try {
       final UserCredential credential =
           await _firebaseAuth.signInWithCredential(phoneAuthCredential);
 
       return Right(credential.user);
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e);
+      final message =
+          _firebaseAuthErrorUtil.handleException(e, phoneNumber: phoneNumber);
       return Left(message);
     }
   }

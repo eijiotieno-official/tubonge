@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart';
 
 import '../model/provider/firebase_auth_service_provider.dart';
 import '../model/service/firebase_auth_service.dart';
@@ -11,10 +10,7 @@ class SignOutViewModel extends StateNotifier<AsyncValue<bool>> {
   SignOutViewModel(this._firebaseAuthService)
       : super(const AsyncValue.data(false));
 
-  final Logger _logger = Logger();
-
   Future<void> call() async {
-    _logger.i("Sign out process started.");
     state = const AsyncValue.loading();
     final Either<String, bool> result = await _firebaseAuthService.signOut();
     state = result.fold(
@@ -25,7 +21,7 @@ class SignOutViewModel extends StateNotifier<AsyncValue<bool>> {
 }
 
 final signOutProvider =
-    StateNotifierProvider<SignOutViewModel, AsyncValue<bool>>(
+    StateNotifierProvider.autoDispose<SignOutViewModel, AsyncValue<bool>>(
   (ref) {
     final FirebaseAuthService firebaseAuthService =
         ref.watch(firebaseAuthServiceProvider);

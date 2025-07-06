@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart';
 
 import '../../../core/models/phone_model.dart';
 import '../model/base/auth_state_model.dart';
@@ -21,19 +20,14 @@ class ResendCodeViewModel extends StateNotifier<AsyncValue> {
     this._ref,
   ) : super(const AsyncValue.data(null));
 
-  final Logger _logger = Logger();
-
   Future<void> call() async {
     try {
-      _logger.i("Resend code process started.");
       state = const AsyncValue.loading();
 
       final AuthState authState = _ref.watch(authStateProvider);
 
       final PhoneModel? phone = authState.phone;
       final int? resendToken = authState.resendToken;
-
-      _logger.i("Resend code - phone: $phone, resendToken: $resendToken");
 
       final result = await _firebaseAuthService.resendCode(
         phone: phone,
@@ -53,40 +47,27 @@ class ResendCodeViewModel extends StateNotifier<AsyncValue> {
       );
     } catch (e) {
       final String message = _firebaseAuthErrorUtil.handleException(e);
-      _logger.e("Exception in resend code process: $message");
       state = AsyncValue.error(message, StackTrace.current);
     }
   }
 
   void _verificationFailed(FirebaseAuthException error) {
     final String message = _firebaseAuthErrorUtil.handleException(error);
-    _logger.e("Verification failed: $message");
     state = AsyncValue.error(message, StackTrace.current);
   }
 
   void _codeSent(String verificationId, [int? forceResendingToken]) {
-    _logger.i("Code sent. Verification ID: $verificationId");
-    _logger.i("Resend token: ${forceResendingToken ?? 'None'}");
-
+    _ref.read(timerProvider.notifier).startTimer();
     _ref.read(authStateProvider.notifier).updateState(
           resendToken: forceResendingToken,
           verificationId: verificationId,
         );
-
-    _logger.i("Auth state updated with verification ID and resend token.");
-
-    _ref.read(timerProvider.notifier).startTimer();
-    _logger.i("Timer started.");
   }
 
   void _codeAutoRetrievalTimeout(String verificationId) {
-    _logger.i("Code auto retrieval timeout. Verification ID: $verificationId");
-
     _ref.read(authStateProvider.notifier).updateState(
           verificationId: verificationId,
         );
-
-    _logger.i("Auth state updated with verification ID.");
   }
 }
 

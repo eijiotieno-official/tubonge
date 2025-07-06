@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/shared/tubonge_button.dart';
-import '../../../../core/widgets/shared/tubonge_input.dart';
 import '../../model/base/chat_model.dart';
 import '../../model/base/message_model.dart';
 import '../../model/provider/chat_service_provider.dart';
@@ -119,19 +118,20 @@ class _MessageInputViewState extends ConsumerState<MessageInputView> {
                   constraints: BoxConstraints(
                     maxHeight: maxHeight,
                   ),
-                  child: TubongeInput(
+                  child: TextField(
                     controller: _textEditingController,
                     onChanged: _typing,
                     maxLines: null,
                     minLines: 1,
-                    hint: 'Type a message...',
-                    contentPadding: const EdgeInsets.symmetric(
+                    decoration: InputDecoration(
+                      hintText: 'Type a message...',
+                      contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16.0,
                       vertical: 8.0,
                     ),
                   ),
                 ),
-              ),
+              ),),
               const SizedBox(width: 8.0),
               TubongeButton(
                 text: '',

@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../src/auth/model/provider/auth_state_provider.dart';
 import '../../src/auth/view_model/sign_out_view_model.dart';
 import '../../src/chat/model/provider/message_service_provider.dart';
 import '../../src/chat/view/widgets/chats_list_view.dart';
