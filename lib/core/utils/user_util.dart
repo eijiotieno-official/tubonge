@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-/// Utility class for accessing Firestore user collection
+
 class UserUtil {
-  /// Reference to the 'users' collection in Firestore
+  static String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
   static final CollectionReference users =
-      FirebaseFirestore.instance.collection("users");
+      FirebaseFirestore.instance.collection('users');
 }

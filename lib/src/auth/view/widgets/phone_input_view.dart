@@ -80,55 +80,57 @@ class _PhoneInputViewState extends ConsumerState<PhoneInputView> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        spacing: 16.0,
-        children: [
-          const SizedBox(height: 8.0),
-
-          // Country Selection
-          TextField(
-            controller: _countryController,
-            readOnly: true,
-            enabled: !isLoading,
-            onTap: _showCountryPicker,
-            decoration: InputDecoration(
-              hintText: "Country",
-              prefixIcon: const Icon(Icons.flag),
-            ),
-          ),
-
-          // Phone Number Input
-          TextField(
-            controller: _phoneController,
-            keyboardType: TextInputType.phone,
-            enabled: !isLoading && _selectedCountry != null,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onChanged: (value) {
-              _updatePhone();
-              setState(() {});
-            },
-            decoration: InputDecoration(
-              hintText: _selectedCountry != null
-                  ? "Phone Number"
-                  : "Select country first",
-              prefixText:
-                  _selectedCountry != null ? "${_selectedCountry!.dial} " : "",
-              prefixStyle: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+      child: SingleChildScrollView(
+        child: Column(
+          spacing: 16.0,
+          children: [
+            const SizedBox(height: 8.0),
+        
+            // Country Selection
+            TextField(
+              controller: _countryController,
+              readOnly: true,
+              enabled: !isLoading,
+              onTap: _showCountryPicker,
+              decoration: InputDecoration(
+                hintText: "Country",
+                prefixIcon: const Icon(Icons.flag),
               ),
             ),
-          ),
-
-          ErrorMessageView(errorMessage: errorMessage),
-          const Spacer(),
-
-          TubongeButton(
-            text: "Continue",
-            onPressed: _isPhoneValid && !isLoading ? _onContinue : null,
-            isLoading: isLoading,
-          ),
-          const SizedBox(height: 2.0),
-        ],
+        
+            // Phone Number Input
+            TextField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              enabled: !isLoading && _selectedCountry != null,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: (value) {
+                _updatePhone();
+                setState(() {});
+              },
+              decoration: InputDecoration(
+                hintText: _selectedCountry != null
+                    ? "Phone Number"
+                    : "Select country first",
+                prefixText:
+                    _selectedCountry != null ? "${_selectedCountry!.dial} " : "",
+                prefixStyle: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+        
+            ErrorMessageView(errorMessage: errorMessage),
+            const SizedBox(height: 8.0),
+        
+            TubongeButton(
+              text: "Continue",
+              onPressed: _isPhoneValid && !isLoading ? _onContinue : null,
+              isLoading: isLoading,
+              width: double.infinity,
+            ),
+          ],
+        ),
       ),
     );
   }

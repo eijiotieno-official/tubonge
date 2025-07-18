@@ -5,15 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/phone_model.dart';
 import '../model/base/auth_state_model.dart';
 import '../model/provider/auth_state_provider.dart';
-import '../model/provider/firebase_auth_service_provider.dart';
 import '../model/service/firebase_auth_service.dart';
 
 class CodeVerificationViewModel extends StateNotifier<AsyncValue> {
-  final FirebaseAuthService _firebaseAuthService;
   final Ref _ref;
 
-  CodeVerificationViewModel(this._firebaseAuthService, this._ref)
-      : super(const AsyncValue.data(null));
+  CodeVerificationViewModel(this._ref) : super(const AsyncValue.data(null));
+
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
 
   Future<void> call() async {
     state = const AsyncValue.loading();
@@ -46,7 +45,5 @@ class CodeVerificationViewModel extends StateNotifier<AsyncValue> {
 final codeVerificationViewModelProvider =
     StateNotifierProvider.autoDispose<CodeVerificationViewModel, AsyncValue>(
         (ref) {
-  final FirebaseAuthService firebaseAuthService =
-      ref.watch(firebaseAuthServiceProvider);
-  return CodeVerificationViewModel(firebaseAuthService, ref);
+  return CodeVerificationViewModel(ref);
 });

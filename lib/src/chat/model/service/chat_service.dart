@@ -6,11 +6,6 @@ import '../base/chat_model.dart';
 import '../util/chat_utils.dart';
 
 class ChatService {
-  final FirestoreErrorUtil _firestoreErrorUtil;
-  ChatService({
-    required FirestoreErrorUtil firestoreErrorUtil,
-  }) : _firestoreErrorUtil = firestoreErrorUtil;
-
   Either<String, bool> createChat(
       {required String userId, required String chatId}) {
     try {
@@ -20,7 +15,7 @@ class ChatService {
 
       return Right(true);
     } catch (e) {
-      final message = _firestoreErrorUtil.handleException(e);
+      final message = FirestoreErrorUtil.handleException(e);
       return Left(message);
     }
   }
@@ -38,7 +33,7 @@ class ChatService {
       },
     ).handleError(
       (error) {
-        final message = _firestoreErrorUtil.handleException(error);
+        final message = FirestoreErrorUtil.handleException(error);
         return Left("Error subscribing to chats: $message");
       },
     );

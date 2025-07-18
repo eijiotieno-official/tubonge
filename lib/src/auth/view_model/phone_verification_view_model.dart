@@ -4,19 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/phone_model.dart';
 import '../model/provider/auth_state_provider.dart';
-import '../model/provider/firebase_auth_service_provider.dart';
 import '../model/provider/timer_provider.dart';
 import '../model/service/firebase_auth_service.dart';
 import '../model/util/firebase_auth_error_util.dart';
 
 class PhoneVerificationViewModel extends StateNotifier<AsyncValue> {
-  final FirebaseAuthService _firebaseAuthService;
-  final FirebaseAuthErrorUtil _firebaseAuthErrorUtil;
   final Ref _ref;
 
-  PhoneVerificationViewModel(
-      this._firebaseAuthService, this._firebaseAuthErrorUtil, this._ref)
-      : super(AsyncValue.data(null));
+  PhoneVerificationViewModel(this._ref) : super(AsyncValue.data(null));
+
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
 
   Future<void> call() async {
     try {
@@ -49,7 +46,7 @@ class PhoneVerificationViewModel extends StateNotifier<AsyncValue> {
       );
     } catch (e) {
       final PhoneModel? phone = _ref.watch(authStateProvider).phone;
-      final String message = _firebaseAuthErrorUtil.handleException(e,
+      final String message = FirebaseAuthErrorUtil.handleException(e,
           phoneNumber: phone?.phoneNumber);
       state = AsyncValue.error(message, StackTrace.current);
     }
@@ -57,7 +54,7 @@ class PhoneVerificationViewModel extends StateNotifier<AsyncValue> {
 
   void _verificationFailed(FirebaseAuthException error, String? phoneNumber) {
     final String message =
-        _firebaseAuthErrorUtil.handleException(error, phoneNumber: phoneNumber);
+        FirebaseAuthErrorUtil.handleException(error, phoneNumber: phoneNumber);
     state = AsyncValue.error(message, StackTrace.current);
   }
 
@@ -80,11 +77,6 @@ class PhoneVerificationViewModel extends StateNotifier<AsyncValue> {
 final phoneVerificationViewModelProvider =
     StateNotifierProvider<PhoneVerificationViewModel, AsyncValue>(
   (ref) {
-    final FirebaseAuthService firebaseAuthService =
-        ref.watch(firebaseAuthServiceProvider);
-    final FirebaseAuthErrorUtil firebaseAuthErrorUtil = FirebaseAuthErrorUtil();
-
-    return PhoneVerificationViewModel(
-        firebaseAuthService, firebaseAuthErrorUtil, ref);
+    return PhoneVerificationViewModel(ref);
   },
 );

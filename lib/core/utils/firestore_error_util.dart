@@ -1,9 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Utility class for handling and mapping Firestore exceptions to user-friendly messages
 class FirestoreErrorUtil {
-  /// Maps specific [FirebaseException] codes to human-readable error messages
-  String _getErrorMessage(FirebaseException e) {
+  static String _getErrorMessage(FirebaseException e) {
     switch (e.code) {
       case 'permission-denied':
         return 'You do not have permission to perform this action.';
@@ -32,18 +30,14 @@ class FirestoreErrorUtil {
       case 'unimplemented':
         return 'The requested operation is not supported.';
       default:
-        // If the error code isn't explicitly handled, return the default message from Firestore
         return 'An unexpected error occurred: ${e.message}';
     }
   }
 
-  /// Entry point to handle any caught exception and return a safe error message
-  String handleException(Object exception) {
+  static String handleException(Object exception) {
     if (exception is FirebaseException) {
-      // Handle known Firebase exceptions
       return _getErrorMessage(exception);
     } else {
-      // Fallback for non-Firebase exceptions
       return 'An unexpected error occurred: $exception';
     }
   }

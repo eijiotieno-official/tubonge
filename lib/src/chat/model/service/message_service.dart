@@ -1,35 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../../core/models/received_message_model.dart';
 import '../../../../core/utils/firestore_error_util.dart';
+import '../../../../core/utils/user_util.dart';
 import '../base/message_model.dart';
 import '../util/chat_utils.dart';
 
 class MessageService {
-  final FirestoreErrorUtil _firestoreErrorUtil;
-  MessageService({
-    required FirestoreErrorUtil firestoreErrorUtil,
-  }) : _firestoreErrorUtil = firestoreErrorUtil;
-
-  final String? _currentUser = FirebaseAuth.instance.currentUser?.uid;
-
   Either<String, Message> createMessage(Message message) {
     try {
-      if (_currentUser == null) {
+      if (UserUtil.currentUserId == null) {
         return Left("User not log in");
       }
 
       final DocumentReference<Object?> docRef = ChatUtil.messages(
-        userId: _currentUser,
+        userId: UserUtil.currentUserId ?? "",
         chatId: message.receiver,
       ).doc();
 
       final Message updatedMessage = message.copyWith(
-        sender: _currentUser,
+        sender: UserUtil.currentUserId,
         id: docRef.id,
-        status: message.receiver == _currentUser
+        status: message.receiver == UserUtil.currentUserId
             ? MessageStatus.seen
             : MessageStatus.none,
       );
@@ -38,7 +31,7 @@ class MessageService {
 
       return Right(updatedMessage);
     } catch (e) {
-      final message = _firestoreErrorUtil.handleException(e);
+      final message = FirestoreErrorUtil.handleException(e);
       return Left(message);
     }
   }
@@ -52,7 +45,7 @@ class MessageService {
 
       return Right(true);
     } catch (e) {
-      final message = _firestoreErrorUtil.handleException(e);
+      final message = FirestoreErrorUtil.handleException(e);
       return Left(message);
     }
   }
@@ -66,7 +59,7 @@ class MessageService {
 
       return Right(true);
     } catch (e) {
-      final message = _firestoreErrorUtil.handleException(e);
+      final message = FirestoreErrorUtil.handleException(e);
       return Left(message);
     }
   }
@@ -110,7 +103,7 @@ class MessageService {
       },
     ).handleError(
       (error) {
-        final message = _firestoreErrorUtil.handleException(error);
+        final message = FirestoreErrorUtil.handleException(error);
         return Left("Error subscribing to chats: $message");
       },
     );

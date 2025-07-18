@@ -2,23 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/user_info_provider.dart';
+import '../../../../core/views/async_view.dart';
 import '../../../../core/views/avatar_view.dart';
 import '../../../contact/model/base/contact_model.dart';
-import '../../model/base/chat_model.dart';
 import '../../model/base/message_model.dart';
+import '../../view_model/chats_view_model.dart';
 import '../screens/chat_detail_screen.dart';
-import '../../model/service/message_service.dart';
 
 class ChatView extends ConsumerWidget {
-  final Chat chat;
-  const ChatView({super.key, required this.chat});
+  final String chatId;
+  const ChatView({super.key, required this.chatId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final List<Message> sortedMessages =
-        MessageService.sortItemsByDate(chat.messages);
-
-    final Message? message = lastMessage(sortedMessages);
+    Message? message = ref.watch(chatsProvider.notifier).getLastMessage(chatId);
 
     String? text;
 
@@ -26,22 +23,30 @@ class ChatView extends ConsumerWidget {
       text = message.text;
     }
 
-    final AsyncValue<ContactModel> userInfoAsync =
-        ref.watch(userInfoProvider(chat.chatId));
+    AsyncValue<ContactModel?> userInfoAsync =
+        ref.watch(userInfoProvider(chatId));
 
-    return sortedMessages.isEmpty
+    return message == null
         ? SizedBox.shrink()
-        : userInfoAsync.when(
-            data: (contact) {
-              String? photo = contact.photo;
-              String name = contact.name;
+        : AsyncView(
+            asyncValue: userInfoAsync,
+            builder: (user) {
+              if (user == null) {
+                return SizedBox.shrink();
+              }
+
+              String? photo = user.photo;
+
+              String name = user.name;
+
               Text? subtitle = text == null ? null : Text(text);
+
               return ListTile(
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      final String chatId = contact.id ?? "";
+                      final String chatId = user.id ?? "";
                       return ChatDetailScreen(chatId: chatId);
                     },
                   ),
@@ -51,11 +56,6 @@ class ChatView extends ConsumerWidget {
                 subtitle: subtitle,
               );
             },
-            loading: () => SizedBox.shrink(),
-            error: (error, stack) => SizedBox.shrink(),
           );
   }
-
-  Message? lastMessage(List<Message> sortedMessages) =>
-      sortedMessages.isNotEmpty ? sortedMessages.last : null;
 }

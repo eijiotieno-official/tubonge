@@ -4,15 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/phone_model.dart';
 import '../model/base/auth_state_model.dart';
 import '../model/provider/auth_state_provider.dart';
-import '../model/provider/firebase_auth_service_provider.dart';
 import '../model/service/firebase_auth_service.dart';
 
 class ChangePhoneNumberNotifier extends StateNotifier<AsyncValue<bool>> {
-  final FirebaseAuthService _firebaseAuthService;
   final Ref _ref;
 
-  ChangePhoneNumberNotifier(this._firebaseAuthService, this._ref)
-      : super(const AsyncValue.data(false));
+  ChangePhoneNumberNotifier(this._ref) : super(const AsyncValue.data(false));
+
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
 
   Future<void> call() async {
     state = const AsyncValue.loading();
@@ -40,9 +39,6 @@ class ChangePhoneNumberNotifier extends StateNotifier<AsyncValue<bool>> {
 final changePhoneNumberProvider = StateNotifierProvider.autoDispose<
     ChangePhoneNumberNotifier, AsyncValue<bool>>(
   (ref) {
-    final FirebaseAuthService firebaseAuthService =
-        ref.watch(firebaseAuthServiceProvider);
-
-    return ChangePhoneNumberNotifier(firebaseAuthService, ref);
+    return ChangePhoneNumberNotifier(ref);
   },
 );

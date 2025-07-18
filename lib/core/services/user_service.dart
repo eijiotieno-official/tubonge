@@ -1,19 +1,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 
+import '../../src/auth/model/util/firebase_auth_error_util.dart';
 import '../models/user_model.dart';
-import '../utils/firestore_error_util.dart';
 import '../utils/user_util.dart';
 
-
 class UserService {
-  final FirestoreErrorUtil _firestoreErrorUtil;
-
-  UserService({
-    required FirestoreErrorUtil firestoreErrorUtil,
-  }) : _firestoreErrorUtil = firestoreErrorUtil;
-
-  
   Future<Either<String, UserModel>> authenticatedUserHandler(
       UserModel model) async {
     try {
@@ -29,14 +22,15 @@ class UserService {
           : await _updateExistingUser(
               model, UserModel.fromMap(userDoc.data() as Map<String, dynamic>));
     } catch (e) {
-      final errorMessage = _firestoreErrorUtil.handleException(e);
+      final errorMessage = FirebaseAuthErrorUtil.handleException(e);
       return Left(errorMessage);
     }
   }
 
-  
   Future<Either<String, UserModel>> _createUser(UserModel model) async {
     try {
+      debugPrint("CREATING USER");
+
       final tokenResult = await _getFCMToken();
       if (!tokenResult.isRight()) {
         return Left('Failed to fetch FCM token');
@@ -52,25 +46,26 @@ class UserService {
     }
   }
 
-  
   Future<Either<String, String>> _getFCMToken() async {
     try {
-      final token = await FirebaseMessaging.instance.getToken();
-      if (token == null) {
-        return Left('FCM token is null');
-      }
-      return Right(token);
+      // TODO : uncomment for FCM
+      // final token = await FirebaseMessaging.instance.getToken();
+      // if (token == null) {
+      //   return Left('FCM token is null');
+      // }
+      return Right("uncomment-for-token");
     } catch (e) {
       return Left('Error fetching FCM token: $e');
     }
   }
 
-  
   Future<Either<String, UserModel>> _updateExistingUser(
     UserModel model,
     UserModel existingModel,
   ) async {
     try {
+      debugPrint("UPDATING USER");
+      
       final tokenResult = await _getFCMToken();
       if (!tokenResult.isRight()) {
         return Left('Failed to fetch FCM token');
@@ -91,7 +86,6 @@ class UserService {
     }
   }
 
-  
   Stream<Either<String, UserModel>> streamUser(String userId) {
     if (userId.isEmpty) {
       return Stream.value(Left('Invalid user ID'));

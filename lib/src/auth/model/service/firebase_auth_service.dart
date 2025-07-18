@@ -7,17 +7,9 @@ import '../../../../core/services/user_service.dart';
 import '../util/firebase_auth_error_util.dart';
 
 class FirebaseAuthService {
-  final FirebaseAuth _firebaseAuth;
-  final FirebaseAuthErrorUtil _firebaseAuthErrorUtil;
-  final UserService _userService;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  FirebaseAuthService({
-    required FirebaseAuth firebaseAuth,
-    required FirebaseAuthErrorUtil firebaseAuthErrorUtil,
-    required UserService userService,
-  })  : _firebaseAuth = firebaseAuth,
-        _firebaseAuthErrorUtil = firebaseAuthErrorUtil,
-        _userService = userService;
+  final UserService _userService = UserService();
 
   User? get _currentUser => _firebaseAuth.currentUser;
 
@@ -44,14 +36,13 @@ class FirebaseAuthService {
               return Left(error);
             },
             (user) async {
-              UserModel model = UserModel.empty;
-
               if (user != null) {
+                UserModel model = UserModel.empty.copyWith(
+                  id: user.uid,
+                  phone: phone,
+                );
                 await _userService.authenticatedUserHandler(
-                  model.copyWith(
-                    id: user.uid,
-                    phone: phone,
-                  ),
+                  model,
                 );
               }
             },
@@ -65,7 +56,7 @@ class FirebaseAuthService {
 
       return Right(null);
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e,
+      final message = FirebaseAuthErrorUtil.handleException(e,
           phoneNumber: phone?.phoneNumber);
       return Left(message);
     }
@@ -107,7 +98,7 @@ class FirebaseAuthService {
         },
       );
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e,
+      final message = FirebaseAuthErrorUtil.handleException(e,
           phoneNumber: phone.phoneNumber);
       return Left(message);
     }
@@ -162,7 +153,7 @@ class FirebaseAuthService {
 
       return Right(true);
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e,
+      final message = FirebaseAuthErrorUtil.handleException(e,
           phoneNumber: phone?.phoneNumber);
       return Left(message);
     }
@@ -193,7 +184,7 @@ class FirebaseAuthService {
 
       return Right(true);
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e,
+      final message = FirebaseAuthErrorUtil.handleException(e,
           phoneNumber: newPhone?.phoneNumber);
       return Left(message);
     }
@@ -207,7 +198,7 @@ class FirebaseAuthService {
 
       return Right(true);
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e);
+      final message = FirebaseAuthErrorUtil.handleException(e);
       return Left(message);
     }
   }
@@ -218,7 +209,7 @@ class FirebaseAuthService {
 
       return Right(true);
     } catch (e) {
-      final message = _firebaseAuthErrorUtil.handleException(e);
+      final message = FirebaseAuthErrorUtil.handleException(e);
       return Left(message);
     }
   }
@@ -233,7 +224,7 @@ class FirebaseAuthService {
       return Right(credential.user);
     } catch (e) {
       final message =
-          _firebaseAuthErrorUtil.handleException(e, phoneNumber: phoneNumber);
+          FirebaseAuthErrorUtil.handleException(e, phoneNumber: phoneNumber);
       return Left(message);
     }
   }

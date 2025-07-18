@@ -1,47 +1,38 @@
+import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart';
 
+import '../../../core/utils/user_util.dart';
 import '../model/base/chat_model.dart';
 import '../model/base/message_model.dart';
 import '../model/service/chat_service.dart';
 import '../model/service/message_service.dart';
-import '../model/provider/chat_service_provider.dart';
-import '../model/provider/message_service_provider.dart';
 
 class ChatsNotifier extends StateNotifier<AsyncValue<List<Chat>>> {
-  final ChatService _chatService;
-  final MessageService _messageService;
-  final String? _userId;
-
-  ChatsNotifier(this._chatService, this._messageService, this._userId)
-      : super(AsyncValue.loading()) {
+  ChatsNotifier() : super(AsyncValue.loading()) {
     _fetch();
   }
 
-  final Logger _logger = Logger();
+  final ChatService _chatService = ChatService();
+
+  final MessageService _messageService = MessageService();
+
+  final String? _userId = UserUtil.currentUserId;
 
   void _fetch() {
     if (_userId == null) {
-      _logger.i("User is not authenticated. No chats to fetch.");
       state = AsyncValue.data(<Chat>[]);
     } else {
-      _logger.i("Fetching chats for user: $_userId");
-
       final Stream<Either<String, List<Chat>>> chatsStreamResult =
           _chatService.streamChats(_userId);
 
       chatsStreamResult.listen(
         (chatsEither) => chatsEither.fold(
           (error) {
-            _logger.e("Error subscribing to chats: $error");
             state = AsyncValue.error(error, StackTrace.current);
           },
           (chats) {
-            _logger.i("Received ${chats.length} chats.");
             if (chats.isEmpty) {
-              _logger.i("No chats found for user: $_userId");
               state = AsyncValue.data(<Chat>[]);
             } else {
               state = AsyncValue.data(chats);
@@ -52,8 +43,6 @@ class ChatsNotifier extends StateNotifier<AsyncValue<List<Chat>>> {
                     .indexWhere((test) => test.chatId == chat.chatId);
 
                 if (chatIndex > -1) {
-                  _logger.i("Subscribing to messages for chat: ${chat.chatId}");
-
                   List<Message> initialMessages =
                       currentChats[chatIndex].messages;
 
@@ -66,22 +55,15 @@ class ChatsNotifier extends StateNotifier<AsyncValue<List<Chat>>> {
                   messagesStreamResult.listen(
                     (messagesEither) => messagesEither.fold(
                       (error) {
-                        _logger.e(
-                            "Error subscribing to messages for chat ${chat.chatId}: $error");
                         state = AsyncValue.error(error, StackTrace.current);
                       },
                       (messages) {
-                        _logger.i(
-                            "Received ${messages.length} messages for chat: ${chat.chatId}");
                         currentChats[chatIndex] = currentChats[chatIndex]
                             .copyWith(messages: messages);
                         state = AsyncValue.data(currentChats);
                       },
                     ),
                   );
-                } else {
-                  _logger.w(
-                      "Chat with id ${chat.chatId} not found in current state.");
                 }
               }
             }
@@ -90,12 +72,35 @@ class ChatsNotifier extends StateNotifier<AsyncValue<List<Chat>>> {
       );
     }
   }
+
+  Chat? getChatById(String? chatId) {
+    List<Chat>? currentChats = state.value;
+
+    if (currentChats == null) return null;
+
+    Chat? chat = currentChats.firstWhereOrNull((chat) => chat.chatId == chatId);
+
+    return chat;
+  }
+
+  List<Message> getChatMessages(String? chatId) {
+    List<Message> messages = getChatById(chatId)?.messages ?? [];
+
+    List<Message> sortedMessages = MessageService.sortItemsByDate(messages);
+
+    return sortedMessages;
+  }
+
+  Message? getLastMessage(String? chatId) {
+    List<Message> messages = getChatMessages(chatId);
+
+    Message? message = messages.isNotEmpty ? messages.last : null;
+
+    return message;
+  }
 }
 
 final chatsProvider =
     StateNotifierProvider<ChatsNotifier, AsyncValue<List<Chat>>>((ref) {
-  final ChatService chatService = ref.watch(chatsServiceProvider);
-  final MessageService messageService = ref.watch(messageServiceProvider);
-  final String? userId = FirebaseAuth.instance.currentUser?.uid;
-  return ChatsNotifier(chatService, messageService, userId);
+  return ChatsNotifier();
 });

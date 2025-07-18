@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/utils/date_utils.dart';
 import '../../model/base/message_model.dart';
-import 'time_status_view.dart';
 
 class TextMessageView extends StatelessWidget {
   final TextMessage message;
@@ -32,7 +31,8 @@ class TextMessageView extends StatelessWidget {
               Text(
                 TubongeDateUtils.formatTime(message.timeSent),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.75),
+                  color: theme.textTheme.bodyMedium?.color
+                      ?.withValues(alpha: 0.75),
                 ),
               ),
               if (showStatus) ...[
@@ -47,25 +47,27 @@ class TextMessageView extends StatelessWidget {
   }
 
   Widget _buildStatusIcon(ThemeData theme) {
-    IconData iconData;
-    Color iconColor;
+    IconData iconData = Icons.watch_later_rounded;
+    Color iconColor = theme.colorScheme.primary.withValues(alpha: 0.15);
 
     switch (message.status) {
-      case MessageStatus.none:
-        iconData = Icons.watch_later_rounded;
-        break;
       case MessageStatus.sent:
         iconData = Icons.done_rounded;
         break;
       case MessageStatus.delivered:
+        iconData = Icons.done_all_rounded;
+        break;
       case MessageStatus.seen:
         iconData = Icons.done_all_rounded;
+        break;
+      default:
+        iconData = Icons.watch_later_rounded;
         break;
     }
 
     iconColor = (message.status == MessageStatus.seen
         ? theme.colorScheme.primary
-        : theme.colorScheme.primary.withOpacity(0.15));
+        : theme.colorScheme.primary.withValues(alpha: 0.15));
 
     return Icon(
       iconData,

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 class FirebaseAuthErrorUtil {
-  String handleException(Object e, {String? phoneNumber}) {
+ static String handleException(Object e, {String? phoneNumber}) {
     if (e is FirebaseAuthException) {
       return _getPhoneAuthErrorMessage(e, phoneNumber: phoneNumber);
     }
@@ -9,7 +9,7 @@ class FirebaseAuthErrorUtil {
     return 'An unexpected error occurred: $e';
   }
 
-  String _getPhoneAuthErrorMessage(
+static String _getPhoneAuthErrorMessage(
     FirebaseAuthException exception, {
     String? phoneNumber,
   }) {

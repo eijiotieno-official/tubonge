@@ -6,8 +6,8 @@ import '../../model/base/chat_model.dart';
 import '../../view_model/chats_view_model.dart';
 import 'chat_view.dart';
 
-class ChatsListView extends ConsumerWidget {
-  const ChatsListView({super.key});
+class ChatsList extends ConsumerWidget {
+  const ChatsList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,7 +21,7 @@ class ChatsListView extends ConsumerWidget {
           itemBuilder: (context, index) {
             final Chat chat = chats[index];
 
-            return ChatView(chat: chat);
+            return ChatView(chatId: chat.chatId);
           },
         );
       },

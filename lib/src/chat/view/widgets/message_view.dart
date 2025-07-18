@@ -1,8 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+import '../../../../core/utils/user_util.dart';
 import '../../../../core/widgets/shared/avatar_view.dart';
 import '../../model/base/message_model.dart';
 import '../../model/provider/message_service_provider.dart';
@@ -27,115 +27,97 @@ class MessageView extends ConsumerStatefulWidget {
 }
 
 class _MessageViewState extends ConsumerState<MessageView> {
+  String? get _currentUserId => UserUtil.currentUserId;
+
+  Message get _message => widget.message;
+
+  bool get _fromCurrentUser => _message.sender == _currentUserId;
+
+  bool get _showStatus => _fromCurrentUser;
+
+  bool get _isSelected => ref
+      .watch(selectedMessagesProvider.notifier)
+      .isMessageSelected(chatId: widget.chatId, messageId: _message.id);
+
   @override
   void initState() {
     super.initState();
-    _updateStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _onSeen();
+    });
   }
 
-  void _updateStatus() {
-    final Message message = widget.message;
-
-    final bool shouldUpdate = message.status != MessageStatus.seen &&
-        message.sender != FirebaseAuth.instance.currentUser?.uid;
+  void _onSeen() {
+    final bool shouldUpdate = _message.status != MessageStatus.seen &&
+        _message.sender != _currentUserId;
 
     if (shouldUpdate) {
       ref.read(messageServiceProvider).onMessageSeen(
-          userId: message.sender,
-          chatId: message.receiver,
-          messageId: message.id);
+            userId: _message.sender,
+            chatId: _message.receiver,
+            messageId: _message.id,
+          );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Message message = widget.message;
     final theme = Theme.of(context);
 
-    final bool fromCurrentUser =
-        message.sender == FirebaseAuth.instance.currentUser?.uid;
-
-    final Alignment alignment =
-        fromCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
-
-    final bool showStatus = fromCurrentUser;
-
-    final Color color =
-        fromCurrentUser ? theme.hoverColor : theme.colorScheme.primaryContainer;
-
-    final bool isSelected = ref
-        .read(selectedMessagesProvider.notifier)
-        .isMessageSelected(chatId: widget.chatId, messageId: message.id);
+    final Color color = _fromCurrentUser
+        ? theme.hoverColor
+        : theme.colorScheme.primaryContainer;
 
     return AutoScrollTag(
       key: ValueKey(widget.index),
       index: widget.index,
       controller: widget.controller,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        padding: const EdgeInsets.symmetric(vertical: 2.0),
         child: Row(
-          mainAxisAlignment:
-              fromCurrentUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: _fromCurrentUser
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            if (!fromCurrentUser) ...[
-              AvatarView(
-                size: 32.0,
-                onTap: () {
-                  // TODO: Implement profile view
-                },
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.75,
               ),
-              const SizedBox(width: 8.0),
-            ],
-            Flexible(
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.75,
-                ),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? theme.colorScheme.primary.withOpacity(0.1)
-                      : color,
+              decoration: BoxDecoration(
+                color: _isSelected
+                    ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                    : color,
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    ref.read(selectedMessagesProvider.notifier).select(
+                          chatId: widget.chatId,
+                          message: _message,
+                          isOnTap: true,
+                        );
+                  },
+                  onLongPress: () {
+                    ref.read(selectedMessagesProvider.notifier).select(
+                          chatId: widget.chatId,
+                          message: _message,
+                          isOnTap: false,
+                        );
+                  },
                   borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      ref.read(selectedMessagesProvider.notifier).select(
-                            chatId: widget.chatId,
-                            message: message,
-                            isOnTap: true,
-                          );
-                    },
-                    onLongPress: () {
-                      ref.read(selectedMessagesProvider.notifier).select(
-                            chatId: widget.chatId,
-                            message: message,
-                            isOnTap: false,
-                          );
-                    },
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextMessageView(
-                        message: message as TextMessage,
-                        showStatus: showStatus,
-                      ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextMessageView(
+                      message: _message as TextMessage,
+                      showStatus: _showStatus,
                     ),
                   ),
                 ),
               ),
             ),
-            if (fromCurrentUser) ...[
-              const SizedBox(width: 8.0),
-              AvatarView(
-                size: 32.0,
-                onTap: () {
-                  // TODO: Implement profile view
-                },
-              ),
-            ],
           ],
         ),
       ),

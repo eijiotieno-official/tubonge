@@ -6,11 +6,11 @@ import '../../../../core/utils/date_time_util.dart';
 import '../../model/base/message_model.dart';
 import 'message_view.dart';
 
-class MessagesListView extends StatelessWidget {
+class MessagesList extends StatelessWidget {
   final AutoScrollController scrollController;
   final List<Message> messages;
   final String chatId;
-  const MessagesListView(
+  const MessagesList(
       {super.key,
       required this.scrollController,
       required this.messages,

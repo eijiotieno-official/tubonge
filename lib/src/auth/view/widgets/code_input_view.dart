@@ -49,46 +49,48 @@ class _CodeInputViewState extends ConsumerState<CodeInputView> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        spacing: 16.0,
-        children: [
-          const SizedBox(height: 8.0),
-
-          // Code Input
-          TextField(
-            controller: _codeController,
-            autofocus: true,
-            enabled: !isLoading,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onChanged: (value) {
-              _updateCode();
-              setState(() {});
-            },
-            decoration: const InputDecoration(
-              hintText: "Enter verification code",
-              prefixIcon: Icon(Icons.security),
+      child: SingleChildScrollView(
+        child: Column(
+          spacing: 16.0,
+          children: [
+            const SizedBox(height: 8.0),
+        
+            // Code Input
+            TextField(
+              controller: _codeController,
+              autofocus: true,
+              enabled: !isLoading,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: (value) {
+                _updateCode();
+                setState(() {});
+              },
+              decoration: const InputDecoration(
+                hintText: "Enter verification code",
+                prefixIcon: Icon(Icons.security),
+              ),
             ),
-          ),
-
-          // Resend Code Button
-          TextButton(
-            onPressed: timerCount == 0 && !isLoading ? _onResendCode : null,
-            child: timerCount == 0
-                ? const Text("Resend Code")
-                : Text("Resend Code in $timerCount seconds"),
-          ),
-
-          ErrorMessageView(errorMessage: errorMessage),
-          const Spacer(),
-
-          TubongeButton(
-            text: "Continue",
-            onPressed: _isCodeValid && !isLoading ? _onContinue : null,
-            isLoading: isLoading,
-          ),
-          const SizedBox(height: 2.0),
-        ],
+        
+            // Resend Code Button
+            TextButton(
+              onPressed: timerCount == 0 && !isLoading ? _onResendCode : null,
+              child: timerCount == 0
+                  ? const Text("Resend Code")
+                  : Text("Resend Code in $timerCount seconds"),
+            ),
+        
+            ErrorMessageView(errorMessage: errorMessage),
+            const SizedBox(height: 8.0),
+        
+            TubongeButton(
+              text: "Continue",
+              onPressed: _isCodeValid && !isLoading ? _onContinue : null,
+              isLoading: isLoading,
+              width: double.infinity,
+            ),
+          ],
+        ),
       ),
     );
   }

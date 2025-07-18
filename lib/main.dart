@@ -13,8 +13,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/models/received_message_model.dart';
 import 'core/services/router_service.dart';
 import 'core/services/theme_service.dart';
-import 'core/utils/cloud_functions_error_util.dart';
-import 'core/utils/firestore_error_util.dart';
 import 'firebase_options.dart';
 import 'src/chat/model/service/chat_notification_service.dart';
 import 'src/chat/model/service/message_service.dart';
@@ -22,15 +20,15 @@ import 'src/contact/model/base/contact_model.dart';
 import 'src/contact/model/service/contact_service.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  MessageService messageService =
-      MessageService(firestoreErrorUtil: FirestoreErrorUtil());
-  ContactService contactService =
-      ContactService(cloudFunctionsErrorUtil: CloudFunctionsErrorUtil());
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  MessageService messageService = MessageService();
+  ContactService contactService = ContactService();
 
   final Either<String, List<ContactModel>> contactsEither =
       await contactService.loadContacts();
 
-  final receivedMessage = ReceivedMessage.fromRemoteMessage(
+  final ReceivedMessage receivedMessage = ReceivedMessage.fromRemoteMessage(
       message: message,
       contacts: contactsEither.fold((l) => <ContactModel>[], (r) => r));
 
@@ -60,6 +58,7 @@ Future<void> main() async {
 
   final ChatNotificationService chatNotificationService =
       ChatNotificationService();
+
   await chatNotificationService.init();
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

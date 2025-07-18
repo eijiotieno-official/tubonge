@@ -3,10 +3,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../src/auth/model/provider/auth_state_provider.dart';
 import '../../src/auth/view_model/sign_out_view_model.dart';
 import '../../src/chat/model/provider/message_service_provider.dart';
-import '../../src/chat/view/widgets/chats_list_view.dart';
+import '../../src/chat/view/widgets/chats_list.dart';
 import '../../src/contact/view/screens/contacts_screen.dart';
 import '../../src/contact/view_model/contacts_view_model.dart';
 import '../models/received_message_model.dart';
@@ -52,7 +51,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final receivedMessage = ReceivedMessage.fromRemoteMessage(
             message: message, contacts: contacts);
 
-        // Mark the message as delivered
         ref
             .read(messageServiceProvider)
             .onMessageDelivered(message: receivedMessage);
@@ -120,7 +118,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      body: ChatsListView(), // Displays list of chats
+      body: ChatsList(), // Displays list of chats
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Navigate to contacts screen to add a new contact or chat

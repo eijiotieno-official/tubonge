@@ -7,10 +7,6 @@ import '../../../../core/utils/cloud_functions_error_util.dart';
 import '../base/contact_model.dart';
 
 class ContactService {
-  final CloudFunctionsErrorUtil _cloudFunctionsErrorUtil;
-  ContactService({
-    required CloudFunctionsErrorUtil cloudFunctionsErrorUtil,
-  }) : _cloudFunctionsErrorUtil = cloudFunctionsErrorUtil;
 
   Future<Either<String, List<flutter_contacts.Contact>>>
       _fetchLocalContacts() async {
@@ -98,20 +94,20 @@ class ContactService {
           .httpsCallable('request_registered_contacts');
 
       final Map<String, List<Map<String, dynamic>>> body = {
-        'request_registered_contacts': contacts.map((c) => c.toMap()).toList()
+        'contacts': contacts.map((c) => c.toMap()).toList()
       };
 
       final HttpsCallableResult response = await callable.call(body);
 
       final data = response.data;
 
-      final List<ContactModel> registeredContacts = (data['contacts'] as List)
+      final List<ContactModel> registeredContacts = (data['registeredContacts'] as List)
           .map((contact) => ContactModel.fromJson(contact))
           .toList();
 
       return Right(registeredContacts);
     } catch (e) {
-      final message = _cloudFunctionsErrorUtil.handleException(e);
+      final message = CloudFunctionsErrorUtil.handleException(e);
       return Left(message);
     }
   }

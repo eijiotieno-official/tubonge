@@ -58,7 +58,7 @@ class ChatNotificationService {
   Future<void> showNotification({required ReceivedMessage message}) async {
     final Random random = Random();
 
-    final int id = random.nextInt(10000) + 1;
+    final int id = random.nextInt(1000000) + 1;
 
     await _awesomeNotifications.createNotification(
       content: NotificationContent(
