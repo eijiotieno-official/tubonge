@@ -8,8 +8,12 @@ import '../base/message_model.dart';
 import '../util/chat_utils.dart';
 
 class MessageService {
-  Either<String, Message> createMessage(Message message) {
+  Either<String, Message> createMessage(Message? message) {
     try {
+      if (message == null) {
+        return Left("Create a message");
+      }
+
       if (UserUtil.currentUserId == null) {
         return Left("User not log in");
       }
@@ -132,7 +136,7 @@ class MessageService {
       chatId: message.receiverId,
     ).doc(message.messageId).update(
       {
-        'status': MessageStatusExtension.toStringValue(MessageStatus.delivered),
+        'status': MessageStatus.delivered.toMap(),
       },
     );
   }
@@ -147,7 +151,7 @@ class MessageService {
       chatId: chatId,
     ).doc(messageId).update(
       {
-        'status': MessageStatusExtension.toStringValue(MessageStatus.seen),
+        'status': MessageStatus.seen.toMap(),
       },
     );
   }

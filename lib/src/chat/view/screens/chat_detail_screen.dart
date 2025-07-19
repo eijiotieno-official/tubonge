@@ -38,6 +38,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
         return AsyncView(
             asyncValue: chatsAsync,
             builder: (chats) {
+              
               List<Message> messages = ref
                   .watch(chatsProvider.notifier)
                   .getChatMessages(user.id ?? '');

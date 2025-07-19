@@ -69,7 +69,7 @@ class _MessageInputViewState extends ConsumerState<MessageInput> {
   void _onTyping(String text) {
     if (_message == null) {
       setState(() {
-        _message = TextMessage.empty();
+        _message = TextMessage.empty;
       });
     } else {
       final message = _message;
@@ -83,8 +83,8 @@ class _MessageInputViewState extends ConsumerState<MessageInput> {
 
   void _onSend() {
     if (_message != null) {
-      final Message updatedMessage =
-          _message!.copyWith(receiver: widget.chatId);
+      final Message? updatedMessage =
+          _message?.copyWith(receiver: widget.chatId);
 
       final Either<String, Message> result =
           ref.read(messageServiceProvider).createMessage(updatedMessage);

@@ -124,19 +124,5 @@ class TextMessage(Message):
             time_sent=time_sent or self.time_sent,
         )
 
-    @staticmethod
-    def empty():
-        return TextMessage(
-            text="",
-            id="",
-            sender="",
-            receiver="",
-            status=MessageStatus.none,
-            time_sent=datetime.now(),
-        )
-
-    def is_not_empty(self):
-        return bool(self.text and self.sender and self.receiver)
-
     def __str__(self):
         return f"TextMessage(text: {self.text})"

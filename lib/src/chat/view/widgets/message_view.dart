@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import '../../../../core/utils/user_util.dart';
-import '../../../../core/widgets/shared/avatar_view.dart';
 import '../../model/base/message_model.dart';
 import '../../model/provider/message_service_provider.dart';
 import '../../model/provider/selected_messages_provider.dart';

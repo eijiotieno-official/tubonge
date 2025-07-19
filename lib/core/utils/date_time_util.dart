@@ -1,23 +1,18 @@
 import 'package:intl/intl.dart';
 
-/// Utility class for formatting and interpreting DateTime objects
 class DateTimeUtil {
-  /// Returns a human-readable label for a given [dateTime], like "Today", "Yesterday", or a formatted date
   static String day(DateTime dateTime) {
-    final today = DateTime.now(); // Get the current date and time
-    final difference =
-        today.difference(dateTime).inDays; // Calculate the difference in days
+    final today = DateTime.now();
+    final difference = today.difference(dateTime).inDays;
 
     if (difference == 0) {
-      return 'Today'; // If the date is today
+      return "Today";
     } else if (difference == 1) {
-      return 'Yesterday'; // If the date was one day ago
+      return "Yesterday";
     } else if (difference <= 7) {
-      return DateFormat.EEEE()
-          .format(dateTime); // Return the weekday name (e.g., Monday)
+      return DateFormat.EEEE().format(dateTime);
     } else {
-      return DateFormat('d MMM yyyy')
-          .format(dateTime); // Return the full date (e.g., 12 Apr 2025)
+      return DateFormat('Today').format(dateTime);
     }
   }
 }

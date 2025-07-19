@@ -1,20 +1,14 @@
-import '../../../../core/models/base_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum MessageType {
   text,
-  none,
-}
+  none;
 
-extension MessageTypeExtension on MessageType {
-  static String toStringValue(MessageType type) {
-    try {
-      return type.name;
-    } catch (e) {
-      throw Exception("Unknown MessageType: $type");
-    }
+  String toMap() {
+    return name;
   }
 
-  static MessageType toTypeValue(String string) {
+  static MessageType fromMap(String string) {
     try {
       return MessageType.values
           .firstWhere((MessageType test) => test.name == string);
@@ -28,19 +22,13 @@ enum MessageStatus {
   sent,
   delivered,
   seen,
-  none,
-}
+  none;
 
-extension MessageStatusExtension on MessageStatus {
-  static String toStringValue(MessageStatus status) {
-    try {
-      return status.name;
-    } catch (e) {
-      throw Exception("Unknown MessageStatus: $status");
-    }
+  String toMap() {
+    return name;
   }
 
-  static MessageStatus toTypeValue(String string) {
+  static MessageStatus fromMap(String string) {
     try {
       return MessageStatus.values
           .firstWhere((MessageStatus test) => test.name == string);
@@ -50,7 +38,7 @@ extension MessageStatusExtension on MessageStatus {
   }
 }
 
-abstract class Message extends BaseModel {
+abstract class Message {
   final String id;
   final String sender;
   final String receiver;
@@ -76,20 +64,10 @@ abstract class Message extends BaseModel {
     DateTime? timeSent,
   });
 
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'sender': sender,
-      'receiver': receiver,
-      'type': MessageTypeExtension.toStringValue(type),
-      'status': MessageStatusExtension.toStringValue(status),
-      'timeSent': timeSent,
-    };
-  }
+  Map<String, dynamic> toMap();
 
   static Message fromMap(Map<String, dynamic> map) {
-    final messageType = MessageTypeExtension.toTypeValue(map["type"]);
+    final messageType = MessageType.fromMap(map["type"]);
 
     switch (messageType) {
       case MessageType.text:
@@ -108,7 +86,7 @@ abstract class Message extends BaseModel {
           sender: "",
           receiver: "",
           status: MessageStatus.none,
-          timeSent: DateTime.now(),
+          timeSent: DateTime(2024, 1, 1),
         );
       case MessageType.none:
         return null;
@@ -131,19 +109,33 @@ class TextMessage extends Message {
   @override
   Map<String, dynamic> toMap() {
     return {
-      ...super.toMap(),
       'text': text,
+      'id': id,
+      'sender': sender,
+      'receiver': receiver,
+      'status': status.toMap(),
+      'type': type.toMap(),
+      'timeSent': FieldValue.serverTimestamp(),
     };
   }
 
   static TextMessage fromMap(Map<String, dynamic> map) {
+    DateTime timeSent;
+    if (map['timeSent'] == null) {
+      timeSent = DateTime.now();
+    } else if (map['timeSent'] is Timestamp) {
+      timeSent = map['timeSent'].toDate();
+    } else {
+      timeSent = DateTime.now();
+    }
+
     return TextMessage(
       text: map['text'],
       id: map['id'],
       sender: map['sender'],
       receiver: map['receiver'],
-      status: MessageStatusExtension.toTypeValue(map['status']),
-      timeSent: map['timeSent'].toDate(),
+      status: MessageStatus.fromMap(map['status']),
+      timeSent: timeSent,
     );
   }
 
@@ -167,16 +159,14 @@ class TextMessage extends Message {
     );
   }
 
-  static TextMessage empty() {
-    return TextMessage(
-      text: "",
-      id: "",
-      sender: "",
-      receiver: "",
-      status: MessageStatus.none,
-      timeSent: DateTime.now(),
-    );
-  }
+  static TextMessage get empty => TextMessage(
+        text: "",
+        id: "",
+        sender: "",
+        receiver: "",
+        status: MessageStatus.none,
+        timeSent: DateTime(2024, 1, 1),
+      );
 
   bool isNotEmpty() {
     return text.isNotEmpty && sender.isNotEmpty && receiver.isNotEmpty;
