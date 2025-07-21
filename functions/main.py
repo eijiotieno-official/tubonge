@@ -1,12 +1,24 @@
 from firebase_admin import initialize_app
 import logging
+import sys
 
 # Initialize Firebase app first
 initialize_app()
 
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
+# Set up structured logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+
+# Set specific log levels for different modules
+logging.getLogger("firebase_functions").setLevel(logging.WARNING)
+logging.getLogger("firebase_admin").setLevel(logging.WARNING)
+logging.getLogger("google.cloud").setLevel(logging.WARNING)
+
 logger = logging.getLogger(__name__)
+logger.info("Firebase Functions initialized with structured logging")
 
 # Import functions at module level but don't execute them
 # This allows Firebase Functions to discover and register them

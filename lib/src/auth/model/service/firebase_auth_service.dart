@@ -15,6 +15,7 @@ class FirebaseAuthService {
 
   Future<Either<String, void>> verifyPhoneNumber({
     required PhoneModel? phone,
+    required void Function(PhoneAuthCredential) verificationCompleted,
     required Function(FirebaseAuthException) verificationFailed,
     required Function(String, int?) codeSent,
     required Function(String) codeAutoRetrievalTimeout,
@@ -27,6 +28,8 @@ class FirebaseAuthService {
       await _firebaseAuth.verifyPhoneNumber(
         phoneNumber: phone.phoneNumber,
         verificationCompleted: (phoneAuthCredential) async {
+          verificationCompleted(phoneAuthCredential);
+          
           final Either<String, User?> result = await signInWithCredential(
               phoneAuthCredential,
               phoneNumber: phone.phoneNumber);

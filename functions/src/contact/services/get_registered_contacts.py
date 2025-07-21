@@ -21,10 +21,10 @@ def get_db():
 def has_seven_digit_match(phone_number1: str, phone_number2: str) -> bool:
     if len(phone_number1) < 7 or len(phone_number2) < 7:
         return False
-    match_count = sum(
-        1 for a, b in zip(phone_number1[::-1], phone_number2[::-1]) if a == b
-    )
-    return match_count >= 7
+    # Get the last 7 digits of each phone number
+    last_seven_1 = phone_number1[-7:]
+    last_seven_2 = phone_number2[-7:]
+    return last_seven_1 == last_seven_2
 
 
 def is_direct_match(phone_number1: str, phone_number2: str) -> bool:

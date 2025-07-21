@@ -31,6 +31,7 @@ class _PhoneInputViewState extends ConsumerState<PhoneInputView> {
   Future<void> _showCountryPicker() async {
     final result = await FlDialCodePicker.show(
       context: context,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       pickerType: PickerType.responsive,
       initialCountry: _selectedCountry,
       showCloseButton: false,
@@ -78,73 +79,63 @@ class _PhoneInputViewState extends ConsumerState<PhoneInputView> {
 
     final errorMessage = phoneVerificationState.error?.toString();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: SingleChildScrollView(
-        child: Column(
-          spacing: 16.0,
-          children: [
-            const SizedBox(height: 8.0),
-        
-            // Country Selection
-            TextField(
-              controller: _countryController,
-              readOnly: true,
-              enabled: !isLoading,
-              onTap: _showCountryPicker,
-              decoration: InputDecoration(
-                hintText: "Country",
-                prefixIcon: const Icon(Icons.flag),
-              ),
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        spacing: 16.0,
+        children: [
+          const SizedBox(height: 8.0),
+          Text(
+            "Enter your phone number to receive a verification code via SMS",
+          ),
+          TextField(
+            controller: _countryController,
+            readOnly: true,
+            enabled: !isLoading,
+            onTap: _showCountryPicker,
+            decoration: InputDecoration(
+              hintText: "Select your country",
+              prefixIcon: Icon(Icons.flag),
             ),
-        
-            // Phone Number Input
-            TextField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              enabled: !isLoading && _selectedCountry != null,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onChanged: (value) {
-                _updatePhone();
-                setState(() {});
-              },
-              decoration: InputDecoration(
-                hintText: _selectedCountry != null
-                    ? "Phone Number"
-                    : "Select country first",
-                prefixText:
-                    _selectedCountry != null ? "${_selectedCountry!.dial} " : "",
-                prefixStyle: theme.textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+          ),
+          TextField(
+            controller: _phoneController,
+            keyboardType: TextInputType.phone,
+            enabled: !isLoading && _selectedCountry != null,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onChanged: (value) {
+              _updatePhone();
+              setState(() {});
+            },
+            decoration: InputDecoration(
+              hintText: _selectedCountry != null
+                  ? "Enter your phone number"
+                  : "Please select your country first",
+              prefixText:
+                  _selectedCountry != null ? "${_selectedCountry!.dial} " : "",
+              prefixStyle: theme.textTheme.bodyLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
-        
-            ErrorMessageView(errorMessage: errorMessage),
-            const SizedBox(height: 8.0),
-        
-            TubongeButton(
-              text: "Continue",
-              onPressed: _isPhoneValid && !isLoading ? _onContinue : null,
-              isLoading: isLoading,
-              width: double.infinity,
-            ),
-          ],
-        ),
+          ),
+          ErrorMessageView(errorMessage: errorMessage),
+          TubongeButton(
+            text: "Send Verification Code",
+            onPressed: _isPhoneValid && !isLoading ? _onContinue : null,
+            isLoading: isLoading,
+            width: double.infinity,
+          ),
+        ],
       ),
     );
   }
 }
 
-/// A mixin that provides phone validation utilities.
 mixin PhoneValidationMixin {
-  /// Validate a phone number format.
   static bool isValidPhoneFormat(String phoneNumber) {
     final digitsOnly = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
     return digitsOnly.length >= 7 && digitsOnly.length <= 15;
   }
 
-  /// Validate a phone model.
   static String? validatePhoneModel(PhoneModel? phone) {
     if (phone == null) return "Phone number is required";
     if (phone.dialCode.isEmpty) return "Country code is required";

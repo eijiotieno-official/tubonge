@@ -21,21 +21,21 @@ import 'src/contact/model/service/contact_service.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
+
   MessageService messageService = MessageService();
   ContactService contactService = ContactService();
+  ChatNotificationService chatNotificationService = ChatNotificationService();
 
-  final Either<String, List<ContactModel>> contactsEither =
+  Either<String, List<ContactModel>> contactsEither =
       await contactService.loadContacts();
 
-  final ReceivedMessage receivedMessage = ReceivedMessage.fromRemoteMessage(
-      message: message,
-      contacts: contactsEither.fold((l) => <ContactModel>[], (r) => r));
+  List<ContactModel> contacts =
+      contactsEither.fold((l) => <ContactModel>[], (r) => r);
+
+  ReceivedMessage receivedMessage =
+      ReceivedMessage.fromRemoteMessage(message: message, contacts: contacts);
 
   messageService.onMessageDelivered(message: receivedMessage);
-
-  final ChatNotificationService chatNotificationService =
-      ChatNotificationService();
 
   await chatNotificationService.showNotification(message: receivedMessage);
 }
@@ -45,9 +45,8 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.debug,
-  );
+  await FirebaseAppCheck.instance
+      .activate(androidProvider: AndroidProvider.debug);
 
   if (kDebugMode) {
     FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
@@ -55,11 +54,6 @@ Future<void> main() async {
     FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
     await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
   }
-
-  final ChatNotificationService chatNotificationService =
-      ChatNotificationService();
-
-  await chatNotificationService.init();
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 

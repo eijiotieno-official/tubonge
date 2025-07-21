@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -5,18 +7,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../src/auth/view_model/sign_out_view_model.dart';
 import '../../src/chat/model/provider/message_service_provider.dart';
+import '../../src/chat/model/service/chat_notification_service.dart';
 import '../../src/chat/view/widgets/chats_list.dart';
+import '../../src/contact/model/base/contact_model.dart';
+import '../../src/contact/model/service/contact_service.dart';
 import '../../src/contact/view/screens/contacts_screen.dart';
 import '../../src/contact/view_model/contacts_view_model.dart';
 import '../models/received_message_model.dart';
+import '../services/fcm_service.dart';
 import '../services/router_service.dart';
 import '../views/avatar_view.dart';
 
-/// HomeScreen displays the main screen with a list of chats and a menu for actions like logout.
-/// It also handles incoming push notifications for new messages.
 class HomeScreen extends ConsumerStatefulWidget {
-  final ReceivedAction?
-      receivedAction; // Used for deep linking to specific chat
+  final ReceivedAction? receivedAction;
   const HomeScreen({super.key, required this.receivedAction});
 
   @override
@@ -24,38 +27,26 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
+  StreamSubscription<RemoteMessage>? _fcmSubscription;
 
-    // If there is a received push notification action (like a direct message),
-    // navigate to the corresponding chat screen.
-    if (widget.receivedAction != null) {
-      final message =
-          ReceivedMessage.fromPayload(widget.receivedAction?.payload);
+  Future<void> _initializePermissions() async {
+    await ChatNotificationService().init();
 
-      final userId = message.receiverId;
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) {
-          AppRouter.goToChat(userId); // Navigate to chat with the user
-        },
-      );
-    }
+    await ContactService().requestPermission();
+  }
 
-    // Listen for incoming Firebase push notifications when the app is in the foreground
-    FirebaseMessaging.onMessage.listen(
+  void _setupFCMListener() {
+    _fcmSubscription = FirebaseMessaging.onMessage.listen(
       (RemoteMessage message) {
-        // Watch the contacts list from Riverpod
-        final contacts = ref.watch(contactsProvider).value ?? [];
+        List<ContactModel> contacts = ref.read(contactsProvider).value ?? [];
 
-        final receivedMessage = ReceivedMessage.fromRemoteMessage(
+        ReceivedMessage receivedMessage = ReceivedMessage.fromRemoteMessage(
             message: message, contacts: contacts);
 
         ref
             .read(messageServiceProvider)
             .onMessageDelivered(message: receivedMessage);
 
-        // Show a snackbar with the message details
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -66,12 +57,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               behavior: SnackBarBehavior.floating,
               content: ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: AvatarView(
-                    imageUrl:
-                        receivedMessage.senderPhoto), // Display sender's photo
-                title:
-                    Text(receivedMessage.senderName), // Display sender's name
-                subtitle: Text(receivedMessage.text), // Display message content
+                leading: AvatarView(imageUrl: receivedMessage.senderPhoto),
+                title: Text(receivedMessage.senderName),
+                subtitle: Text(receivedMessage.text),
               ),
             ),
           );
@@ -80,37 +68,69 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Handles menu actions, such as logging out.
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.receivedAction != null) {
+      ReceivedMessage message =
+          ReceivedMessage.fromPayload(widget.receivedAction?.payload);
+
+      String userId = message.receiverId;
+
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) {
+          AppRouter.goToChat(userId);
+        },
+      );
+    }
+
+    _initializePermissions();
+    _setupFCMListener();
+    _initializeFCMTokenRefresh();
+  }
+
+  void _initializeFCMTokenRefresh() {
+    FCMService.initializeTokenRefresh();
+  }
+
+  @override
+  void dispose() {
+    _fcmSubscription?.cancel();
+    FCMService.dispose();
+    super.dispose();
+  }
+
   Future<void> _handleMenuSelection(String value) async {
     if (value == 'logout') {
-      // Calls the signOut provider to log the user out
+      if (!mounted) return;
       await ref.read(signOutProvider.notifier).call();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(contactsProvider);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Tubonge"), // App name
+        title: const Text("Tubonge"),
         actions: [
-          // Search icon button (functionality not defined yet)
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.search_rounded),
           ),
-          // More options menu (logout in this case)
           PopupMenuButton<String>(
             elevation: 1,
             padding: EdgeInsets.zero,
             menuPadding: EdgeInsets.zero,
             icon: const Icon(Icons.more_vert_rounded),
-            onSelected: _handleMenuSelection, // Call when menu item is selected
+            onSelected: _handleMenuSelection,
             borderRadius: BorderRadius.circular(16.0),
             itemBuilder: (BuildContext context) {
               return [
                 const PopupMenuItem<String>(
-                  value: 'logout', // Logout option
+                  value: 'logout',
                   child: Text('Logout'),
                 ),
               ];
@@ -118,10 +138,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      body: ChatsList(), // Displays list of chats
+      body: ChatsList(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to contacts screen to add a new contact or chat
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -131,7 +150,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           );
         },
-        child: const Icon(Icons.add), // Icon for adding a new contact/chat
+        child: const Icon(Icons.add),
       ),
     );
   }

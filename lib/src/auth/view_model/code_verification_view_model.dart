@@ -43,7 +43,6 @@ class CodeVerificationViewModel extends StateNotifier<AsyncValue> {
 }
 
 final codeVerificationViewModelProvider =
-    StateNotifierProvider.autoDispose<CodeVerificationViewModel, AsyncValue>(
-        (ref) {
+    StateNotifierProvider<CodeVerificationViewModel, AsyncValue>((ref) {
   return CodeVerificationViewModel(ref);
 });

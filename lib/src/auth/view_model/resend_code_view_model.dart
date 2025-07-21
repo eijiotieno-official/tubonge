@@ -65,7 +65,7 @@ class ResendCodeViewModel extends StateNotifier<AsyncValue> {
 }
 
 final resendCodeViewModelProvider =
-    StateNotifierProvider<ResendCodeViewModel, AsyncValue>(
+    StateNotifierProvider.autoDispose<ResendCodeViewModel, AsyncValue>(
   (ref) {
     return ResendCodeViewModel(ref);
   },

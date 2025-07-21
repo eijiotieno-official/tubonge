@@ -65,5 +65,33 @@ class PhoneModel {
   int get hashCode =>
       isoCode.hashCode ^ dialCode.hashCode ^ phoneNumber.hashCode;
 
-  bool get isValidPhoneNumber => phoneNumber.replaceAll(dialCode, "").isNotEmpty;
+  bool get isValidPhoneNumber =>
+      phoneNumber.replaceAll(dialCode, "").isNotEmpty;
+
+  /// Formats a phone number string for display in a readable format
+  static String formatPhoneNumber(String? phoneNumber) {
+    if (phoneNumber == null || phoneNumber.isEmpty) {
+      return "your phone number";
+    }
+
+    // Remove any non-digit characters
+    final digitsOnly = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+
+    // Format based on length
+    if (digitsOnly.length == 10) {
+      // Format as (XXX) XXX-XXXX
+      return "(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6)}";
+    } else if (digitsOnly.length == 11 && digitsOnly.startsWith('1')) {
+      // Format as +1 (XXX) XXX-XXXX
+      return "+1 (${digitsOnly.substring(1, 4)}) ${digitsOnly.substring(4, 7)}-${digitsOnly.substring(7)}";
+    } else if (digitsOnly.length > 10) {
+      // For international numbers, show country code + last 10 digits
+      final countryCode = digitsOnly.substring(0, digitsOnly.length - 10);
+      final localNumber = digitsOnly.substring(digitsOnly.length - 10);
+      return "+$countryCode (${localNumber.substring(0, 3)}) ${localNumber.substring(3, 6)}-${localNumber.substring(6)}";
+    } else {
+      // Fallback to original number
+      return phoneNumber;
+    }
+  }
 }

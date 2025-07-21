@@ -9,8 +9,10 @@ class SignOutViewModel extends StateNotifier<AsyncValue<bool>> {
   final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
 
   Future<void> call() async {
+    if (!mounted) return;
     state = const AsyncValue.loading();
     final Either<String, bool> result = await _firebaseAuthService.signOut();
+    if (!mounted) return;
     state = result.fold(
       (error) => AsyncValue.error(error, StackTrace.current),
       (success) => AsyncValue.data(success),
@@ -19,7 +21,7 @@ class SignOutViewModel extends StateNotifier<AsyncValue<bool>> {
 }
 
 final signOutProvider =
-    StateNotifierProvider.autoDispose<SignOutViewModel, AsyncValue<bool>>(
+    StateNotifierProvider<SignOutViewModel, AsyncValue<bool>>(
   (ref) {
     return SignOutViewModel();
   },

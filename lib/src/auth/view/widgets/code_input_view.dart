@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tubonge/src/auth/model/provider/auth_state_provider.dart';
 
+import '../../../../core/models/phone_model.dart';
 import '../../../../core/views/error_message_view.dart';
 import '../../../../core/widgets/shared/tubonge_button.dart';
 import '../../model/provider/timer_provider.dart';
@@ -47,50 +48,46 @@ class _CodeInputViewState extends ConsumerState<CodeInputView> {
     final isLoading = codeVerificationState.isLoading;
     final errorMessage = codeVerificationState.error?.toString();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: SingleChildScrollView(
-        child: Column(
-          spacing: 16.0,
-          children: [
-            const SizedBox(height: 8.0),
-        
-            // Code Input
-            TextField(
-              controller: _codeController,
-              autofocus: true,
-              enabled: !isLoading,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onChanged: (value) {
-                _updateCode();
-                setState(() {});
-              },
-              decoration: const InputDecoration(
-                hintText: "Enter verification code",
-                prefixIcon: Icon(Icons.security),
-              ),
+    final phoneNumber = ref.watch(authStateProvider).phone?.phoneNumber;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        spacing: 16.0,
+        children: [
+          const SizedBox(height: 8.0),
+          Text(
+            "Enter the 6-digit verification code sent to ${PhoneModel.formatPhoneNumber(phoneNumber)}",
+          ),
+          TextField(
+            controller: _codeController,
+            autofocus: true,
+            enabled: !isLoading,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            onChanged: (value) {
+              _updateCode();
+              setState(() {});
+            },
+            decoration: const InputDecoration(
+              hintText: "Enter the 6-digit verification code",
+              prefixIcon: Icon(Icons.security),
             ),
-        
-            // Resend Code Button
-            TextButton(
-              onPressed: timerCount == 0 && !isLoading ? _onResendCode : null,
-              child: timerCount == 0
-                  ? const Text("Resend Code")
-                  : Text("Resend Code in $timerCount seconds"),
-            ),
-        
-            ErrorMessageView(errorMessage: errorMessage),
-            const SizedBox(height: 8.0),
-        
-            TubongeButton(
-              text: "Continue",
-              onPressed: _isCodeValid && !isLoading ? _onContinue : null,
-              isLoading: isLoading,
-              width: double.infinity,
-            ),
-          ],
-        ),
+          ),
+          TextButton(
+            onPressed: timerCount == 0 && !isLoading ? _onResendCode : null,
+            child: timerCount == 0
+                ? const Text("Resend verification code")
+                : Text("Resend code in $timerCount seconds"),
+          ),
+          ErrorMessageView(errorMessage: errorMessage),
+          TubongeButton(
+            text: "Verify Code",
+            onPressed: _isCodeValid && !isLoading ? _onContinue : null,
+            isLoading: isLoading,
+            width: double.infinity,
+          ),
+        ],
       ),
     );
   }

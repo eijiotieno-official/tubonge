@@ -39,7 +39,7 @@ class ReceivedMessage {
         .firstWhereOrNull((contact) => contact.id == processed.senderId);
 
     if (matchingContact != null) {
-      processed.copyWith(senderName: matchingContact.name);
+      return processed.copyWith(senderName: matchingContact.name);
     }
 
     return processed;

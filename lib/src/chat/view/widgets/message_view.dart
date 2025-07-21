@@ -108,7 +108,8 @@ class _MessageViewState extends ConsumerState<MessageView> {
                   },
                   borderRadius: BorderRadius.circular(12.0),
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 4.0),
                     child: TextMessageView(
                       message: _message as TextMessage,
                       showStatus: _showStatus,

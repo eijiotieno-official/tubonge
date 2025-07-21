@@ -2,8 +2,8 @@ from firebase_functions import https_fn
 import json
 import logging
 
-
-logger = logging.getLogger()
+# Set up logger with structured format
+logger = logging.getLogger(__name__)
 
 
 def create_response(data, status_code, error=False):
@@ -16,19 +16,17 @@ def create_response(data, status_code, error=False):
     Returns:
         https_fn.Response: A formatted HTTP response.
     """
-    logger.info("Starting to create the response.")
+    logger.debug(f"[CREATE_RESPONSE] Creating response with status {status_code}")
 
     # Log the input parameters
-    logger.debug(f"Input data: {data}")
-    logger.debug(f"Status code: {status_code}")
-    logger.debug(f"Error flag: {error}")
+    logger.debug(f"[CREATE_RESPONSE] Input data: {data}")
+    logger.debug(f"[CREATE_RESPONSE] Error flag: {error}")
 
     # Prepare the response data
     response_data = {"error": data} if error else {"data": data}
-    logger.info(f"Response payload prepared: {response_data}")
+    logger.debug(f"[CREATE_RESPONSE] Response payload: {response_data}")
 
-    # Log the response creation step
-    logger.info(f"Creating response with status code {status_code}.")
+    # Create the response
     response = https_fn.Response(
         json.dumps(response_data),
         status=status_code,
@@ -38,5 +36,7 @@ def create_response(data, status_code, error=False):
         },
     )
 
-    logger.info("Response created successfully.")
+    logger.debug(
+        f"[CREATE_RESPONSE] Response created successfully with status {status_code}"
+    )
     return response

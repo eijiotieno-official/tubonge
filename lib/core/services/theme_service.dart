@@ -6,8 +6,6 @@ class ThemeService {
   static FilledButtonThemeData get filledButtonTheme => FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: Size(double.infinity, 50),
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
@@ -18,7 +16,6 @@ class ThemeService {
       OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: Size(double.infinity, 50),
-          backgroundColor: primaryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
@@ -28,7 +25,6 @@ class ThemeService {
   static TextButtonThemeData get textButtonTheme => TextButtonThemeData(
         style: TextButton.styleFrom(
           minimumSize: Size(double.infinity, 50),
-          backgroundColor: primaryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),

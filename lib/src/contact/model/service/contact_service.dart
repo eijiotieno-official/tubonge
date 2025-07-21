@@ -1,95 +1,101 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as flutter_contacts;
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../core/utils/cloud_functions_error_util.dart';
 import '../base/contact_model.dart';
 
 class ContactService {
+  Future<Either<String, bool>> requestPermission() async {
+    try {
+      bool isPermissionGranted =
+          await flutter_contacts.FlutterContacts.requestPermission();
+
+      if (isPermissionGranted) {
+        return const Right(true);
+      } else {
+        return const Left('Contacts permission denied');
+      }
+    } catch (e) {
+      return Left('Failed to request contacts permission: $e');
+    }
+  }
 
   Future<Either<String, List<flutter_contacts.Contact>>>
       _fetchLocalContacts() async {
     try {
-      final Either<String, bool> permissionResult =
-          await _isPermissionGranted();
+      Either<String, bool> isPermissionGranted = await requestPermission();
 
-      if (permissionResult.isLeft()) {
-        return Left(
-            permissionResult.swap().getOrElse(() => 'Permission denied'));
-      }
+      if (isPermissionGranted.isRight()) {
+        List<flutter_contacts.Contact> contacts =
+            await flutter_contacts.FlutterContacts.getContacts(
+                withProperties: true);
 
-      final List<flutter_contacts.Contact> contacts =
-          await flutter_contacts.FlutterContacts.getContacts(
-              withProperties: true);
+        List<flutter_contacts.Contact> filteredContacts = contacts
+            .where((contact) =>
+                contact.name.first.isNotEmpty && contact.phones.isNotEmpty)
+            .map((contact) {
+          List<flutter_contacts.Phone> phones = contact.phones;
 
-      final List<flutter_contacts.Contact> filteredContacts = contacts
-          .where((contact) =>
-              contact.name.first.isNotEmpty && contact.phones.isNotEmpty)
-          .map((contact) {
-        contact.phones = contact.phones.map((phone) {
-          phone.number = phone.number.replaceAll(' ', '');
-          return phone;
+          List<flutter_contacts.Phone> cleanedPhones = phones.map((phone) {
+            final cleanedNumber = phone.number
+                .toString()
+                .replaceAll(' ', '')
+                .replaceAll(RegExp(r'[^\d+]'), '');
+            return flutter_contacts.Phone(cleanedNumber);
+          }).toList();
+
+          return flutter_contacts.Contact(
+            name: contact.name,
+            phones: cleanedPhones,
+          );
         }).toList();
 
-        return contact;
-      }).toList();
+        final List<flutter_contacts.Contact> uniqueContacts =
+            _getUniqueContactsByPhone(filteredContacts);
 
-      final List<flutter_contacts.Contact> uniqueContacts =
-          <flutter_contacts.Contact>[];
-      final Set<String> contactSet = <String>{};
+        return Right(uniqueContacts);
+      } else {
+        return Left('Contacts permission denied');
+      }
+    } catch (e) {
+      return Left("Failed to fetch local contacts: $e");
+    }
+  }
 
-      for (var contact in filteredContacts) {
-        final String contactKey =
-            '${contact.name.first}${contact.name.last}${contact.phones.map((phone) => phone.number).join()}';
+  List<flutter_contacts.Contact> _getUniqueContactsByPhone(
+      List<flutter_contacts.Contact> contacts) {
+    final Map<String, flutter_contacts.Contact> uniqueContacts = {};
 
-        if (!contactSet.contains(contactKey)) {
-          contactSet.add(contactKey);
-          uniqueContacts.add(contact);
+    for (var contact in contacts) {
+      // Check each phone number individually
+      for (var phone in contact.phones) {
+        String phoneNumber = phone.number;
+
+        // If this phone number is already in our map, skip this contact
+        if (uniqueContacts.containsKey(phoneNumber)) {
+          continue;
         }
       }
 
-      return Right(uniqueContacts);
-    } catch (e) {
-      return Left(e.toString());
-    }
-  }
-
-  Future<Either<String, bool>> _isPermissionGranted() async {
-    try {
-      final PermissionStatus status = await Permission.contacts.status;
-
-      if (status.isGranted) {
-        return Right(true);
-      } else if (status.isDenied || status.isRestricted) {
-        return Left('Permission to access contacts is denied.');
-      } else {
-        return Left('Unknown permission status.');
+      // If we reach here, none of this contact's phone numbers exist yet
+      // Use the first phone number as the key
+      if (contact.phones.isNotEmpty) {
+        String phoneKey = contact.phones.first.number;
+        uniqueContacts[phoneKey] = contact;
       }
-    } catch (e) {
-      return Left('Error checking permission: $e');
     }
-  }
 
-  Future<Either<String, bool>> _requestContactPermission() async {
-    try {
-      final PermissionStatus status = await Permission.contacts.request();
-
-      if (status.isGranted) {
-        return Right(true);
-      } else if (status.isDenied || status.isRestricted) {
-        return Left('Permission to access contacts was denied.');
-      } else {
-        return Left('Unknown permission status.');
-      }
-    } catch (e) {
-      return Left('Error requesting permission: $e');
-    }
+    return uniqueContacts.values.toList();
   }
 
   Future<Either<String, List<ContactModel>>> _getRegisteredContacts(
       List<ContactModel> contacts) async {
     try {
+      if (contacts.isEmpty) {
+        return Right([]);
+      }
+
       final HttpsCallable callable = FirebaseFunctions.instance
           .httpsCallable('request_registered_contacts');
 
@@ -101,9 +107,10 @@ class ContactService {
 
       final data = response.data;
 
-      final List<ContactModel> registeredContacts = (data['registeredContacts'] as List)
-          .map((contact) => ContactModel.fromJson(contact))
-          .toList();
+      final List<ContactModel> registeredContacts =
+          (data['registeredContacts'] as List)
+              .map((contact) => ContactModel.fromJson(contact))
+              .toList();
 
       return Right(registeredContacts);
     } catch (e) {
@@ -113,34 +120,28 @@ class ContactService {
   }
 
   Future<Either<String, List<ContactModel>>> loadContacts() async {
-    try {
-      final Either<String, bool> permissionResult =
-          await _requestContactPermission();
+    Either<String, List<flutter_contacts.Contact>> localResult =
+        await _fetchLocalContacts();
 
-      return await permissionResult.fold(
-        (error) async => Left(error),
-        (success) async {
-          final Either<String, List<flutter_contacts.Contact>> localResult =
-              await _fetchLocalContacts();
+    return localResult.fold(
+      (localError) => Left(localError),
+      (localContacts) async {
+        List<ContactModel> contacts = localContacts
+            .map((contact) => ContactModel.fromContact(contact))
+            .toList();
 
-          return await localResult.fold(
-            (error) async => Left(error),
-            (contactsRaw) async {
-              final List<ContactModel> contacts = contactsRaw
-                  .map((contact) => ContactModel.fromContact(contact))
-                  .toList();
+        if (contacts.isEmpty) {
+          return Right([]);
+        } else {
+          Either<String, List<ContactModel>> registeredContactsResult =
+              await _getRegisteredContacts(contacts);
 
-              if (contacts.isEmpty) {
-                return Right([]);
-              } else {
-                return await _getRegisteredContacts(contacts);
-              }
-            },
+          return registeredContactsResult.fold(
+            (registeredError) => Left(registeredError),
+            (registeredContacts) => Right(registeredContacts),
           );
-        },
-      );
-    } catch (e) {
-      return Left(e.toString());
-    }
+        }
+      },
+    );
   }
 }

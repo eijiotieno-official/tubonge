@@ -16,7 +16,6 @@ class ContactsScreen extends ConsumerStatefulWidget {
 
 class _ContactsScreenState extends ConsumerState<ContactsScreen> {
   final TextEditingController _searchController = TextEditingController();
-
   String _searchQuery = '';
 
   @override
@@ -47,42 +46,77 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
     final AsyncValue<List<ContactModel>> contactsValue =
         ref.watch(contactsProvider);
 
-    return AsyncView(
-      asyncValue: contactsValue,
-      builder: (data) {
-        final contacts = _searchQuery.isEmpty
-            ? data
-            : data
-                .where((contact) => contact.name
-                    .toLowerCase()
-                    .trim()
-                    .contains(_searchQuery.toLowerCase().trim()))
-                .toList();
+    return Scaffold(
+      appBar: AppBar(
+        titleSpacing: 0.0,
+        title: TextField(
+          autofocus: true,
+          controller: _searchController,
+          decoration: const InputDecoration(
+            hintText: 'Search contact...',
+            border: InputBorder.none,
+          ),
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value.trim();
+            });
+          },
+        ),
+        actions: [
+          PopupMenuButton<String>(
+            elevation: 1,
+            padding: EdgeInsets.zero,
+            menuPadding: EdgeInsets.zero,
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (value) {
+              if (value == 'refresh') {
+                _onRefresh();
+              }
+            },
+            borderRadius: BorderRadius.circular(16.0),
+            itemBuilder: (BuildContext context) {
+              return [
+                const PopupMenuItem<String>(
+                  value: 'refresh',
+                  child: Text('Refresh'),
+                ),
+              ];
+            },
+          ),
+        ],
+      ),
+      body: AsyncView(
+          asyncValue: contactsValue,
+          errorBuilder: (error, stackTrace) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 8.0,
+              children: [
+                Text(error.toString()),
+                TextButton(
+                  onPressed: _onRefresh,
+                  child: const Text('Try again'),
+                ),
+              ],
+            );
+          },
+          builder: (data) {
+            List<ContactModel> contacts = _searchQuery.isEmpty
+                ? data
+                : data
+                    .where((contact) => contact.name
+                        .toLowerCase()
+                        .trim()
+                        .contains(_searchQuery.toLowerCase().trim()))
+                    .toList();
 
-        return Scaffold(
-          appBar: AppBar(
-            titleSpacing: 0.0,
-            title: TextField(
-              autofocus: true,
-              controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: 'Search contacts...',
-                border: InputBorder.none,
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.trim();
-                });
-              },
-            ),
-          ),
-          body: ContactsListView(
-            contacts: contacts,
-            onRefresh: _onRefresh,
-            onContactTap: _onContactTap,
-          ),
-        );
-      },
+            return ContactsListView(
+              contacts: contacts,
+              onRefresh: _onRefresh,
+              onContactTap: _onContactTap,
+            );
+          }),
     );
   }
 }

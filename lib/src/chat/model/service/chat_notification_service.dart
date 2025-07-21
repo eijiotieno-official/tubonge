@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:dartz/dartz.dart';
 
 import '../../../../core/models/received_message_model.dart';
 import '../../../../core/services/router_service.dart';
@@ -14,12 +15,23 @@ class ChatNotificationService {
 
   ReceivedAction? initialAction;
 
-  Future<void> init() async {
-    final bool isAllowed = await _awesomeNotifications.isNotificationAllowed();
+  Future<Either<String, bool>> init() async {
+    bool isAllowed = await _awesomeNotifications.isNotificationAllowed();
+
     if (!isAllowed) {
-      await _awesomeNotifications.requestPermissionToSendNotifications();
+      bool isGranted =
+          await _awesomeNotifications.requestPermissionToSendNotifications();
+
+      if (!isGranted) {
+        return const Left('Notification permission not granted');
+      } else {
+        return const Right(true);
+      }
     }
+
     await _initialize();
+
+    return const Right(true);
   }
 
   Future<void> _initialize() async {
@@ -56,8 +68,13 @@ class ChatNotificationService {
   }
 
   Future<void> showNotification({required ReceivedMessage message}) async {
-    final Random random = Random();
+    final bool isAllowed = await _awesomeNotifications.isNotificationAllowed();
 
+    if (!isAllowed) {
+      return;
+    }
+
+    final Random random = Random();
     final int id = random.nextInt(1000000) + 1;
 
     await _awesomeNotifications.createNotification(

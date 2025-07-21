@@ -48,12 +48,11 @@ class UserService {
 
   Future<Either<String, String>> _getFCMToken() async {
     try {
-      // TODO : uncomment for FCM
-      // final token = await FirebaseMessaging.instance.getToken();
-      // if (token == null) {
-      //   return Left('FCM token is null');
-      // }
-      return Right("uncomment-for-token");
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token == null) {
+        return Left('FCM token is null');
+      }
+      return Right(token);
     } catch (e) {
       return Left('Error fetching FCM token: $e');
     }

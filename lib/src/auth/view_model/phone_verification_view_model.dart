@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,45 +10,33 @@ import '../model/util/firebase_auth_error_util.dart';
 class PhoneVerificationViewModel extends StateNotifier<AsyncValue> {
   final Ref _ref;
 
-  PhoneVerificationViewModel(this._ref) : super(AsyncValue.data(null));
+  PhoneVerificationViewModel(this._ref) : super(const AsyncValue.data(null));
 
   final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
 
   Future<void> call() async {
-    try {
-      state = AsyncValue.loading();
+    state = AsyncValue.loading();
 
-      final PhoneModel? phone = _ref.watch(authStateProvider).phone;
+    final PhoneModel? phone = _ref.watch(authStateProvider).phone;
 
-      if (phone == null) {
-        state =
-            AsyncValue.error("Phone number is required", StackTrace.current);
-        return;
-      }
-
-      final Either<String, void> result =
-          await _firebaseAuthService.verifyPhoneNumber(
-        phone: phone,
-        verificationFailed: (error) =>
-            _verificationFailed(error, phone.phoneNumber),
-        codeSent: _codeSent,
-        codeAutoRetrievalTimeout: _codeAutoRetrievalTimeout,
-      );
-
-      if (!mounted) return;
-
-      state = result.fold(
-        (error) => AsyncValue.error(error, StackTrace.current),
-        (_) {
-          return AsyncValue.data(null);
-        },
-      );
-    } catch (e) {
-      final PhoneModel? phone = _ref.watch(authStateProvider).phone;
-      final String message = FirebaseAuthErrorUtil.handleException(e,
-          phoneNumber: phone?.phoneNumber);
-      state = AsyncValue.error(message, StackTrace.current);
+    if (phone == null) {
+      state = AsyncValue.error("Phone number is required", StackTrace.current);
+      return;
     }
+
+    await _firebaseAuthService.verifyPhoneNumber(
+      phone: phone,
+      verificationCompleted: (phoneAuthCredential) =>
+          _verificationCompleted(phoneAuthCredential),
+      verificationFailed: (error) =>
+          _verificationFailed(error, phone.phoneNumber),
+      codeSent: _codeSent,
+      codeAutoRetrievalTimeout: _codeAutoRetrievalTimeout,
+    );
+  }
+
+  void _verificationCompleted(PhoneAuthCredential phoneAuthCredential) {
+    state = AsyncValue.data(phoneAuthCredential);
   }
 
   void _verificationFailed(FirebaseAuthException error, String? phoneNumber) {
@@ -65,12 +52,16 @@ class PhoneVerificationViewModel extends StateNotifier<AsyncValue> {
           resendToken: forceResendingToken,
           verificationId: verificationId,
         );
+
+    state = const AsyncValue.data(null);
   }
 
   void _codeAutoRetrievalTimeout(String verificationId) {
     _ref.read(authStateProvider.notifier).updateState(
           verificationId: verificationId,
         );
+
+    state = AsyncValue.error("Code auto retrieval timeout", StackTrace.current);
   }
 }
 
