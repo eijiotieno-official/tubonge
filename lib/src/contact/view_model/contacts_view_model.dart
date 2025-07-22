@@ -22,7 +22,7 @@ class ContactsViewModel extends StateNotifier<AsyncValue<List<ContactModel>>> {
 
       result.fold(
         (error) {
-          // If it's a permission error, we should show a more user-friendly message
+          
           if (error.contains('Permission to access contacts')) {
             state = AsyncValue.error(
               'Please grant contact permission in app settings to view your contacts.',

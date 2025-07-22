@@ -1,9 +1,5 @@
-import logging
 import json
 from firebase_functions import https_fn
-
-# Set up logger with structured format
-logger = logging.getLogger(__name__)
 
 from src.contact.models.contact_model import ContactModel
 from src.contact.services.get_registered_contacts import get_registered_contacts
@@ -16,16 +12,16 @@ def request_registered_contacts(req: https_fn.Request) -> https_fn.Response:
     HTTP function to get registered contacts from a list of phone numbers.
     """
     try:
-        logger.info("[REQUEST_CONTACTS] Received request to get registered contacts")
+        print("[REQUEST_CONTACTS] Received request to get registered contacts")
 
         # Log request details for debugging
-        logger.debug(f"[REQUEST_CONTACTS] Request method: {req.method}")
-        logger.debug(f"[REQUEST_CONTACTS] Request headers: {dict(req.headers)}")
-        logger.debug(f"[REQUEST_CONTACTS] Request URL: {req.url}")
+        print(f"[REQUEST_CONTACTS] Request method: {req.method}")
+        print(f"[REQUEST_CONTACTS] Request headers: {dict(req.headers)}")
+        print(f"[REQUEST_CONTACTS] Request URL: {req.url}")
 
         # Check if it's a POST request
         if req.method != "POST":
-            logger.warning(
+            print(
                 f"[REQUEST_CONTACTS] Invalid request method: {req.method}. Expected POST"
             )
             return create_response(
@@ -38,37 +34,35 @@ def request_registered_contacts(req: https_fn.Request) -> https_fn.Response:
             # Log the raw request body for debugging
             try:
                 raw_body = req.get_data(as_text=True)
-                logger.error(
+                print(
                     f"[REQUEST_CONTACTS] Invalid or missing JSON in request body. Raw body: '{raw_body}'"
                 )
             except Exception as e:
-                logger.error(
-                    f"[REQUEST_CONTACTS] Could not read request body: {str(e)}"
-                )
+                print(f"[REQUEST_CONTACTS] Could not read request body: {str(e)}")
 
             return create_response(
                 {"error": "Invalid or missing JSON in request body"}, 400
             )
 
-        logger.debug(
+        print(
             f"[REQUEST_CONTACTS] Request JSON: {json.dumps(request_json, default=str)}"
         )
 
         # Check if "data" key exists and is not None
         data = request_json.get("data")
         if data is None:
-            logger.error("[REQUEST_CONTACTS] Missing 'data' in request JSON")
+            print("[REQUEST_CONTACTS] Missing 'data' in request JSON")
             return create_response({"error": "Missing 'data' in request JSON"}, 400)
 
         # Check if "contacts" key exists in "data"
         contacts_data = data.get("contacts")
         if contacts_data is None:
-            logger.error("[REQUEST_CONTACTS] Missing 'contacts' in request JSON data")
+            print("[REQUEST_CONTACTS] Missing 'contacts' in request JSON data")
             return create_response(
                 {"error": "Missing 'contacts' in request JSON data"}, 400
             )
 
-        logger.info(f"[REQUEST_CONTACTS] Processing {len(contacts_data)} contacts")
+        print(f"[REQUEST_CONTACTS] Processing {len(contacts_data)} contacts")
 
         # Parse JSON strings in contacts_data
         try:
@@ -80,17 +74,17 @@ def request_registered_contacts(req: https_fn.Request) -> https_fn.Response:
                 )
                 for contact in contacts_data
             ]
-            logger.debug(f"[REQUEST_CONTACTS] Parsed {len(contacts)} contact models")
+            print(f"[REQUEST_CONTACTS] Parsed {len(contacts)} contact models")
         except (json.JSONDecodeError, AttributeError) as e:
-            logger.error(
-                f"[REQUEST_CONTACTS] Failed to parse contacts data: {str(e)}",
-                exc_info=True,
-            )
+            print(f"[REQUEST_CONTACTS] Failed to parse contacts data: {str(e)}")
+            import traceback
+
+            print(f"[REQUEST_CONTACTS] Traceback: {traceback.format_exc()}")
             return create_response({"error": "Invalid contacts data format"}, 400)
 
         # Get registered contacts
         registered_contacts = get_registered_contacts(contacts)
-        logger.info(
+        print(
             f"[REQUEST_CONTACTS] Found {len(registered_contacts)} registered contacts"
         )
 
@@ -100,9 +94,15 @@ def request_registered_contacts(req: https_fn.Request) -> https_fn.Response:
             },
             200,
         )
-        logger.info("[REQUEST_CONTACTS] Successfully created response")
+
+        print(
+            f"[REQUEST_CONTACTS] Returning response with {len(registered_contacts)} contacts"
+        )
         return response
 
     except Exception as e:
-        logger.error(f"[REQUEST_CONTACTS] Unexpected error: {str(e)}", exc_info=True)
+        print(f"[REQUEST_CONTACTS] Unexpected error: {str(e)}")
+        import traceback
+
+        print(f"[REQUEST_CONTACTS] Traceback: {traceback.format_exc()}")
         return create_response({"error": "Internal server error"}, 500)

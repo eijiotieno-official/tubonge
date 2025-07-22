@@ -1,50 +1,36 @@
-from src.core.utils.firebase_collections import FirebaseCollections
+from firebase_admin import firestore
 from src.message.models.message import Message, MessageStatus
-import logging
-import json
-
-# Set up the logger with structured format
-_logger = logging.getLogger(__name__)
 
 
-def update_message_status(
-    message: Message,
-    new_status: MessageStatus,
-) -> Message | None:
+def update_message_status(message: Message, new_status: MessageStatus) -> None:
     """
     Updates the status of a message in Firestore.
     """
     try:
-        _logger.info(
-            f"[UPDATE_STATUS] Updating message {message.id} status from '{message.status}' to '{new_status}'"
+        print(
+            f"[UPDATE_STATUS] Updating message {message.id} status to {new_status.value}"
         )
 
-        # Create a copy of the message with the updated status
-        updated_message = message.copy_with(status=new_status)
-        _logger.debug(f"[UPDATE_STATUS] Updated message: {updated_message}")
+        db = firestore.client()
 
-        # Get a reference to the Firestore document
-        message_ref = FirebaseCollections.messages(
-            user_id=message.sender, chat_id=message.receiver
-        ).document(message.id)
-
-        # Convert the updated message object to a dictionary
-        message_data = updated_message.to_map()
-        _logger.debug(
-            f"[UPDATE_STATUS] Firestore update data: {json.dumps(message_data, default=str)}"
+        # Update the message status in sender's chat
+        message_ref = (
+            db.collection("users")
+            .document(message.sender)
+            .collection("chats")
+            .document(message.receiver)
+            .collection("messages")
+            .document(message.id)
         )
 
-        # Update Firestore with the new data
-        message_ref.update(message_data)
-        _logger.info(
-            f"[UPDATE_STATUS] Successfully updated message {message.id} status to '{new_status}'"
-        )
+        message_ref.update({"status": new_status.value})
 
-        return updated_message
+        print(
+            f"[UPDATE_STATUS] Successfully updated message {message.id} status to {new_status.value}"
+        )
 
     except Exception as e:
-        _logger.error(
-            f"[UPDATE_STATUS] Error updating message {message.id} status: {str(e)}",
-            exc_info=True,
-        )
-        return None
+        print(f"[UPDATE_STATUS] Error updating message {message.id} status: {str(e)}")
+        import traceback
+
+        print(f"[UPDATE_STATUS] Traceback: {traceback.format_exc()}")

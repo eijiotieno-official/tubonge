@@ -1,38 +1,37 @@
-from src.core.utils.firebase_collections import FirebaseCollections
+from firebase_admin import firestore
 from src.message.models.message import Message
-import logging
-import json
-
-# Set up logger with structured format
-_logger = logging.getLogger(__name__)
 
 
-def create_copy_for_receiver(message: Message):
+def create_copy_for_receiver(message: Message) -> None:
     """
-    Creates a copy of a message for the receiver's chat.
+    Creates a copy of a message for the receiver in their chat collection.
     """
     try:
-        _logger.info(
-            f"[COPY_RECEIVER] Creating copy for receiver {message.receiver} from sender {message.sender}"
+        print(f"[CREATE_COPY] Creating copy for receiver {message.receiver}")
+
+        db = firestore.client()
+
+        # Create the copy in receiver's chat
+        receiver_chat_ref = (
+            db.collection("users")
+            .document(message.receiver)
+            .collection("chats")
+            .document(message.sender)
         )
 
-        message_ref = FirebaseCollections.messages(
-            user_id=message.receiver, chat_id=message.sender
-        ).document(message.id)
-
-        message_data = message.to_map()
-        _logger.debug(
-            f"[COPY_RECEIVER] Message data: {json.dumps(message_data, default=str)}"
+        # Add the message to the receiver's chat
+        receiver_chat_ref.collection("messages").document(message.id).set(
+            message.to_map()
         )
 
-        message_ref.set(message_data)
-        _logger.info(
-            f"[COPY_RECEIVER] Successfully created copy for message {message.id}"
+        print(
+            f"[CREATE_COPY] Successfully created copy for receiver {message.receiver}"
         )
 
     except Exception as e:
-        _logger.error(
-            f"[COPY_RECEIVER] Error creating copy for message {message.id}: {str(e)}",
-            exc_info=True,
+        print(
+            f"[CREATE_COPY] Error creating copy for receiver {message.receiver}: {str(e)}"
         )
-        raise
+        import traceback
+
+        print(f"[CREATE_COPY] Traceback: {traceback.format_exc()}")

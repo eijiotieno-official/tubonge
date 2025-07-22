@@ -16,7 +16,6 @@ import '../../src/contact/view_model/contacts_view_model.dart';
 import '../models/received_message_model.dart';
 import '../services/fcm_service.dart';
 import '../services/router_service.dart';
-import '../views/avatar_view.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final ReceivedAction? receivedAction;
@@ -36,6 +35,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _setupFCMListener() {
+    debugPrint('Setting up FCM listener');
+
     _fcmSubscription = FirebaseMessaging.onMessage.listen(
       (RemoteMessage message) {
         List<ContactModel> contacts = ref.read(contactsProvider).value ?? [];
@@ -43,28 +44,57 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ReceivedMessage receivedMessage = ReceivedMessage.fromRemoteMessage(
             message: message, contacts: contacts);
 
-        ref
-            .read(messageServiceProvider)
-            .onMessageDelivered(message: receivedMessage);
+        ref.read(messageServiceProvider).onMessageDelivered(
+              senderId: receivedMessage.senderId,
+              receiverId: receivedMessage.receiverId,
+              messageId: receivedMessage.messageId,
+            );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              padding: EdgeInsets.zero,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              behavior: SnackBarBehavior.floating,
-              content: ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: AvatarView(imageUrl: receivedMessage.senderPhoto),
-                title: Text(receivedMessage.senderName),
-                subtitle: Text(receivedMessage.text),
-              ),
-            ),
+          _showSnackBar(
+            senderPhoto: receivedMessage.senderPhoto,
+            senderName: receivedMessage.senderName,
+            text: receivedMessage.text,
           );
         }
       },
+      onError: (error) {
+        debugPrint('FCM listener error: $error');
+      },
+    );
+  }
+
+  void _showSnackBar({
+    required String? senderPhoto,
+    required String senderName,
+    required String text,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        behavior: SnackBarBehavior.floating,
+        content: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: "$senderName : ",
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+              ),
+              TextSpan(
+                text: text,
+                style: TextStyle(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

@@ -33,6 +33,7 @@ dependencies:
   permission_handler: ^12.0.1
   responsive_builder: ^0.7.1
   scroll_to_index: ^3.0.1
+  shimmer: ^3.0.0
 
 dev_dependencies:
   custom_lint: ^0.7.2

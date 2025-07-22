@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/models/received_message_model.dart';
 import '../../../../core/utils/firestore_error_util.dart';
 import '../../../../core/utils/user_util.dart';
 import '../base/message_model.dart';
@@ -129,12 +128,14 @@ class MessageService {
   }
 
   void onMessageDelivered({
-    required ReceivedMessage message,
+    required String senderId,
+    required String receiverId,
+    required String messageId,
   }) {
     ChatUtil.messages(
-      userId: message.senderId,
-      chatId: message.receiverId,
-    ).doc(message.messageId).update(
+      userId: senderId,
+      chatId: receiverId,
+    ).doc(messageId).update(
       {
         'status': MessageStatus.delivered.toMap(),
       },

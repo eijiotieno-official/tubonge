@@ -47,16 +47,8 @@ class MessagesList extends StatelessWidget {
           );
         },
         indexedItemBuilder: (BuildContext context, Message element, int index) {
-          Message? nextMessage =
-              (index + 1 < messages.length) ? messages[index + 1] : null;
-
-          double topPadding =
-              nextMessage == null || nextMessage.sender == element.sender
-                  ? 4.0
-                  : 16.0;
-
           return Padding(
-            padding: EdgeInsets.only(top: topPadding, left: 8, right: 8),
+            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
             child: MessageView(
               chatId: chatId,
               key: Key(element.id),

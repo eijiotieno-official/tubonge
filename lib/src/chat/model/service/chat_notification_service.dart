@@ -82,7 +82,9 @@ class ChatNotificationService {
         id: id,
         channelKey: 'message_channel',
         title: message.senderName,
-        bigPicture: message.senderPhoto,
+        bigPicture: message.senderPhoto?.isNotEmpty == true
+            ? message.senderPhoto
+            : null,
         body: message.text,
         payload: message.toPayload(),
         notificationLayout: NotificationLayout.Messaging,

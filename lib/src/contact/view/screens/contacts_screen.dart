@@ -88,17 +88,20 @@ class _ContactsScreenState extends ConsumerState<ContactsScreen> {
       body: AsyncView(
           asyncValue: contactsValue,
           errorBuilder: (error, stackTrace) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              spacing: 8.0,
-              children: [
-                Text(error.toString()),
-                TextButton(
-                  onPressed: _onRefresh,
-                  child: const Text('Try again'),
-                ),
-              ],
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8.0,
+                children: [
+                  Text(error.toString()),
+                  TextButton(
+                    onPressed: _onRefresh,
+                    child: const Text('Try again'),
+                  ),
+                ],
+              ),
             );
           },
           builder: (data) {

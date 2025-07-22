@@ -1,50 +1,36 @@
-from typing import List, Tuple
-from src.core.utils.firebase_collections import FirebaseCollections
-from src.core.models.user_model import UserModel
-import logging
-import json
-
-# Set up the logger with structured format
-_logger = logging.getLogger(__name__)
+from firebase_admin import firestore
+from typing import Tuple, List, Optional
 
 
-def get_tokens(user_id: str) -> Tuple[List[str], str, str]:
+def get_tokens(user_id: str) -> Tuple[List[str], Optional[str], Optional[str]]:
     """
-    Fetches FCM tokens and user info for a given user ID.
+    Retrieves FCM tokens, phone number, and photo for a given user ID.
+    Returns a tuple of (tokens, phone_number, photo).
     """
     try:
-        _logger.info(f"[GET_TOKENS] Fetching tokens for user {user_id}")
+        print(f"[GET_TOKENS] Fetching tokens for user: {user_id}")
 
-        # Fetch user document snapshot using lazy initialization
-        user_data_snapshot = (
-            FirebaseCollections.get_users_collection().document(user_id).get()
-        )
+        db = firestore.client()
+        user_doc = db.collection("users").document(user_id).get()
 
-        # Check if the user document exists
-        if not user_data_snapshot.exists:
-            _logger.error(f"[GET_TOKENS] User {user_id} not found in Firestore")
-            return [], f"User {user_id} not found", ""
+        if not user_doc.exists:
+            print(f"[GET_TOKENS] User document not found for user: {user_id}")
+            return [], None, None
 
-        # Convert snapshot data to a dictionary
-        user_data = user_data_snapshot.to_dict()
-        _logger.debug(f"[GET_TOKENS] User data: {json.dumps(user_data, default=str)}")
+        user_data = user_doc.to_dict()
+        tokens = user_data.get("tokens", [])
+        phone_data = user_data.get("phone", {})
+        phone_number = phone_data.get("phoneNumber") if phone_data else None
+        photo = user_data.get("photo")
 
-        # Create a UserModel instance from the data
-        user = UserModel.from_map(user_data)
+        print(f"[GET_TOKENS] Found {len(tokens)} tokens for user {user_id}")
+        print(f"[GET_TOKENS] Phone number: {phone_number}, Photo: {photo}")
 
-        # Log success
-        _logger.info(
-            f"[GET_TOKENS] Successfully fetched {len(user.tokens)} tokens for user {user_id}"
-        )
-        _logger.debug(
-            f"[GET_TOKENS] Phone: {user.phone.phone_number}, Photo: {user.photo}"
-        )
-
-        return user.tokens, user.phone.phone_number, user.photo
+        return tokens, phone_number, photo
 
     except Exception as e:
-        error_message = (
-            f"[GET_TOKENS] Error fetching tokens for user {user_id}: {str(e)}"
-        )
-        _logger.error(error_message, exc_info=True)
-        return [], f"Error: {str(e)}", ""
+        print(f"[GET_TOKENS] Error fetching tokens for user {user_id}: {str(e)}")
+        import traceback
+
+        print(f"[GET_TOKENS] Traceback: {traceback.format_exc()}")
+        return [], None, None

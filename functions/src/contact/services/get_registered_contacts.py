@@ -31,9 +31,9 @@ def is_direct_match(phone_number1: str, phone_number2: str) -> bool:
     return phone_number1 == phone_number2
 
 
-def get_registered_contacts(contacts: List[ContactModel]) -> List[ContactModel]:
+def get_registered_contacts(contacts: List[ContactModel]) -> List:
 
-    logger.debug("Fetching users from Firestore")
+    print("[GET_REGISTERED] Fetching users from Firestore")
     # Reference to the 'users' collection in Firestore using lazy initialization
     users_ref = get_db().collection("users")
 
@@ -42,7 +42,7 @@ def get_registered_contacts(contacts: List[ContactModel]) -> List[ContactModel]:
 
     # Transform results to UserModel instances
     users = [UserModel.from_map(user.to_dict()) for user in results]
-    logger.debug(f"Fetched {len(users)} users from Firestore")
+    print(f"[GET_REGISTERED] Fetched {len(users)} users from Firestore")
 
     # Create a dictionary to map phone numbers to user ids
     matched_contacts = []
@@ -72,10 +72,10 @@ def get_registered_contacts(contacts: List[ContactModel]) -> List[ContactModel]:
                         ).to_json()
                     )
                     match_found = True
-                    logger.debug(
-                        f"Match found for contact {contact.id} with user {user.id}"
+                    print(
+                        f"[GET_REGISTERED] Match found for contact {contact.name} with user {user.id}"
                     )
                     break
 
-    logger.debug(f"Total matched contacts: {len(matched_contacts)}")
+    print(f"[GET_REGISTERED] Total matched contacts: {len(matched_contacts)}")
     return matched_contacts

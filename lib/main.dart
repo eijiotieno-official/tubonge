@@ -35,7 +35,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   ReceivedMessage receivedMessage =
       ReceivedMessage.fromRemoteMessage(message: message, contacts: contacts);
 
-  messageService.onMessageDelivered(message: receivedMessage);
+  messageService.onMessageDelivered(
+    senderId: receivedMessage.senderId,
+    receiverId: receivedMessage.receiverId,
+    messageId: receivedMessage.messageId,
+  );
 
   await chatNotificationService.showNotification(message: receivedMessage);
 }
@@ -48,12 +52,12 @@ Future<void> main() async {
   await FirebaseAppCheck.instance
       .activate(androidProvider: AndroidProvider.debug);
 
-  if (kDebugMode) {
-    FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
-    await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
-    FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
-    await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
-  }
+  // if (kDebugMode) {
+  //   FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
+  //   await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+  //   FirebaseFunctions.instance.useFunctionsEmulator('localhost', 5001);
+  //   await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
+  // }
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 

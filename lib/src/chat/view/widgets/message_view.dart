@@ -106,7 +106,7 @@ class _MessageViewState extends ConsumerState<MessageView> {
                           isOnTap: false,
                         );
                   },
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(16.0),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 8.0, vertical: 4.0),

@@ -63,8 +63,6 @@ class UserService {
     UserModel existingModel,
   ) async {
     try {
-      debugPrint("UPDATING USER");
-      
       final tokenResult = await _getFCMToken();
       if (!tokenResult.isRight()) {
         return Left('Failed to fetch FCM token');

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/providers/user_info_provider.dart';
 import '../../../../core/views/async_view.dart';
@@ -15,6 +16,7 @@ class ChatView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    
     Message? message = ref.watch(chatsProvider.notifier).getLastMessage(chatId);
 
     String? text;
@@ -30,6 +32,26 @@ class ChatView extends ConsumerWidget {
         ? SizedBox.shrink()
         : AsyncView(
             asyncValue: userInfoAsync,
+            loadingWidget: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: ListTile(
+                leading: const CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.person),
+                ),
+                title: Container(
+                  width: 100.0,
+                  height: 10.0,
+                  color: Colors.white,
+                ),
+                subtitle: Container(
+                  width: double.infinity,
+                  height: 10.0,
+                  color: Colors.white,
+                ),
+              ),
+            ),
             builder: (user) {
               if (user == null) {
                 return SizedBox.shrink();

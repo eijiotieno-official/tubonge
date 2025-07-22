@@ -21,6 +21,7 @@ final userInfoProvider = StreamProvider.family<ContactModel?, String>(
         } else {
           return userService.streamUser(userId).map(
             (either) {
+              
               return either.fold(
                 (error) => null,
                 (user) => ContactModel(
